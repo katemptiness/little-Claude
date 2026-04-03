@@ -62,6 +62,51 @@ Requires macOS with Python 3.10+ and the Dock positioned at the bottom of the sc
 | Drag & drop | Surprised face, falls back to Dock with gravity |
 | Right-click | Context menu (Open Claude, Open Claude Code, Settings, About Claudy, Quit) |
 
+## Schedule & Activities
+
+Claudy follows a daily routine based on the selected schedule mode. The day is split into periods, and each period has its own mix of possible activities — chosen randomly by weighted probability.
+
+### Day periods
+
+| Period | Night Owl | Early Bird |
+|--------|-----------|------------|
+| Deep sleep | 4:00–11:00 | 22:00–6:00 |
+| Morning | 11:00–13:00 | 6:00–8:00 |
+| Day | 13:00–20:00 | 8:00–15:00 |
+| Evening | 20:00–1:00 | 15:00–20:00 |
+| Late night | 1:00–4:00 | 20:00–22:00 |
+
+### What happens when
+
+| Period | Behavior |
+|--------|----------|
+| **Deep sleep** | Sleeps continuously (zzz...) |
+| **Morning** | Wakes up slowly — idle, walking, meditating, reading, occasional nap |
+| **Day** | Most active — all 12 activities available: reading, coding, fishing, magic, painting, juggling, music, telescope, meditating, playing, summoning a friend. Walks around the Dock frequently |
+| **Evening** | Calmer — reading, fishing, stargazing, music, meditating, summoning. Short naps possible |
+| **Late night** | Winding down — reading, telescope, meditating, music. Naps more often |
+
+Every 8–20 seconds in idle, Claudy rolls the dice and picks a new activity based on the current period's weights. During deep sleep, it just keeps snoozing.
+
+### Activities
+
+Each activity is a **phased animation** — a sequence of sprites, particles, and speech bubbles that plays out automatically:
+
+| Activity | What happens | Particles |
+|----------|-------------|-----------|
+| Reading | Grabs a book, reads, reacts with excitement | Pages |
+| Working | Opens laptop, types furiously, thinks, ships code | Code snippets, sparkles |
+| Fishing | Casts a line, waits, pulls — catches fish, boots, or diamonds | Exclaims, sparkles |
+| Magic | Waves a wand — conjures flowers, rainbows, butterflies, or poof | Varies by result |
+| Sleeping | Nods off (nap or deep sleep depending on time) | Zzz |
+| Playing | Bounces around happily | Notes |
+| Music | Plays a tune | Notes |
+| Painting | Sets up an easel, paints, admires the result | — |
+| Telescope | Pulls out a telescope, gazes at the stars | Stars |
+| Meditating | Sits quietly for a long time | Sparkles |
+| Juggling | Juggles with claws | — |
+| Summoning | Casts a spell, summons a blue friend crab, hangs out, says goodbye | Poof, hearts |
+
 ## Architecture
 
 Built with Python + PyObjC, pure AppKit — no game frameworks, no SpriteKit, no Metal.
