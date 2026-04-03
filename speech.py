@@ -13,7 +13,7 @@ class SpeechBubble:
         self.text_field = None
         self.last_shown = 0
         self.min_interval = 3000  # ms between speeches (just prevents overlap)
-        self.show_chance = 0.3
+        self.show_chance = 1.0  # frequency controlled by character timer
         self._hide_timer = None
         self._visible = False
 

@@ -12,10 +12,10 @@ A tiny pixel-art crab companion that lives on your macOS Dock. It reads books, c
 
 ## What it does
 
-- Wanders along the Dock, performing 13 different activities: reading, fishing, magic, coding, sleeping, playing, painting, stargazing, meditating, juggling, and listening to music
+- Wanders along the Dock, performing 14 different activities: reading, fishing, magic, coding, sleeping, playing, painting, stargazing, meditating, juggling, listening to music, and summoning a friend
 - Follows a configurable schedule — night owl (default) or early bird mode
 - Reacts to clicks (sparkles + hearts!), hover (waves hello), and drag-and-drop (surprise + gravity bounce)
-- Mirrors your activity — opens a terminal or code editor, and the crab starts coding too
+- Mirrors your activity — open a terminal or code editor and the crab starts coding; open Spotify and it listens to music
 - Notices when you launch apps and comments on them
 - Sleeps when your Mac sleeps, yawns when it wakes up
 - Says things in cute speech bubbles — in Russian or English (configurable)
@@ -34,6 +34,14 @@ pip install pyobjc pyobjc-framework-Quartz
 
 # Run
 python3 app.py
+```
+
+### Standalone app
+
+```bash
+pip install py2app
+python setup.py py2app
+open "dist/Little Claude.app"
 ```
 
 Requires macOS with Python 3.10+ and the Dock positioned at the bottom of the screen.
@@ -78,14 +86,15 @@ Right-click → Settings to configure:
 | Claude Code terminal | Terminal, iTerm2, Warp | Terminal |
 | Schedule mode | Night Owl (sleep 4am–11am) / Early Bird (sleep 10pm–6am) | Night Owl |
 | Language | Русский / English | Русский |
+| Speech frequency | Often (10s) / Normal (1 min) / Rarely (10 min) / Very rarely (30 min) / Almost never (1 hr) | Normal |
 
 Settings are saved to `~/.little-claude/settings.json`.
 
 ## Credits
 
-Inspired by [pet-clawd](https://github.com/getcompanion-ai/pet-clawd) (MIT).
+Made by katemptiness & Claude Opus.
 
-Built with love, PyObjC, and Claude.
+Inspired by [pet-clawd](https://github.com/getcompanion-ai/pet-clawd) (MIT).
 
 ## License
 

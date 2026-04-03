@@ -172,8 +172,8 @@ class CrabView(AppKit.NSView):
         menu.addItem_(AppKit.NSMenuItem.separatorItem())
 
         quit_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
-            "Quit", "terminate:", "q")
-        quit_item.setTarget_(AppKit.NSApp)
+            "Quit", "quitApp:", "q")
+        quit_item.setTarget_(AppKit.NSApp.delegate())
         menu.addItem_(quit_item)
 
         AppKit.NSMenu.popUpContextMenu_withEvent_forView_(menu, event, self)
@@ -315,6 +315,9 @@ class AppDelegate(AppKit.NSObject):
         self.gravity_drop = GravityDrop(current_y, self.dock_y)
         self.character.interrupt("surprise")
 
+    def quitApp_(self, sender):
+        AppKit.NSApp.terminate_(None)
+
     def openClaude_(self, sender):
         AppKit.NSWorkspace.sharedWorkspace().launchApplication_("Claude")
 
@@ -349,8 +352,8 @@ class AppDelegate(AppKit.NSObject):
                 '  activate\n'
                 'end tell'
             )
-        ns_script = AppKit.NSAppleScript.alloc().initWithSource_(script)
-        ns_script.executeAndReturnError_(None)
+        import subprocess
+        subprocess.Popen(['osascript', '-e', script])
 
     def openSettings_(self, sender):
         """Open the settings window."""
@@ -360,8 +363,9 @@ class AppDelegate(AppKit.NSObject):
         alert = AppKit.NSAlert.alloc().init()
         alert.setMessageText_("Little Claude")
         alert.setInformativeText_(
-            "A little pixel crab companion for your desktop.\n"
-            "Made with love and PyObjC."
+            "A little pixel crab companion for your desktop.\n\n"
+            "Made by katemptiness & Claude Opus\n"
+            "with love and PyObjC."
         )
         alert.runModal()
 
