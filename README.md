@@ -13,11 +13,13 @@ A tiny pixel-art crab companion that lives on your macOS Dock. It reads books, c
 ## What it does
 
 - Wanders along the Dock, performing 13 different activities: reading, fishing, magic, coding, sleeping, playing, painting, stargazing, meditating, juggling, and listening to music
-- Follows a night-owl schedule — sleeps from 4am to 11am, most active during the day, calms down in the evening
+- Follows a configurable schedule — night owl (default) or early bird mode
 - Reacts to clicks (sparkles + hearts!), hover (waves hello), and drag-and-drop (surprise + gravity bounce)
+- Mirrors your activity — opens a terminal or code editor, and the crab starts coding too
 - Notices when you launch apps and comments on them
 - Sleeps when your Mac sleeps, yawns when it wakes up
-- Occasionally says things in cute speech bubbles (in Russian)
+- Says things in cute speech bubbles — in Russian or English (configurable)
+- Occasionally mutters to itself while idling ("thinking about fish...", "bored...", ":3")
 - All rendered as pixel art: 16x16 sprite grids scaled to 80x80px
 
 ## Installation
@@ -44,7 +46,7 @@ Requires macOS with Python 3.10+ and the Dock positioned at the bottom of the sc
 | Click | Happy bounce + sparkles + hearts |
 | Double-click | Opens Claude.app |
 | Drag & drop | Surprised face, falls back to Dock with gravity |
-| Right-click | Context menu (Open Claude, About, Quit) |
+| Right-click | Context menu (Open Claude, Open Claude Code, Settings, About, Quit) |
 
 ## Architecture
 
@@ -60,10 +62,24 @@ sprites/
 animations.py         # Bounce, shake, gravity drop
 particles.py          # 14 particle types (sparkles, hearts, notes, zzz...)
 speech.py             # Floating speech bubbles
-schedule.py           # Night-owl time-of-day behavior weights
+schedule.py           # Owl/lark time-of-day behavior weights
 system_events.py      # macOS event reactions (app launches, sleep/wake)
+settings.py           # Settings persistence + UI (terminal, schedule, language)
+phrases.py            # Bilingual phrase system (RU/EN)
 config.py             # Palette, constants
 ```
+
+## Settings
+
+Right-click → Settings to configure:
+
+| Setting | Options | Default |
+|---------|---------|---------|
+| Claude Code terminal | Terminal, iTerm2, Warp | Terminal |
+| Schedule mode | Night Owl (sleep 4am–11am) / Early Bird (sleep 10pm–6am) | Night Owl |
+| Language | Русский / English | Русский |
+
+Settings are saved to `~/.little-claude/settings.json`.
 
 ## Credits
 

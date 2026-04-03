@@ -78,12 +78,19 @@ class Settings:
         set_language(value)
 
 
-class SettingsWindow:
+class SettingsWindow(AppKit.NSObject):
     """A simple settings panel."""
 
-    def __init__(self):
+    def init(self):
+        self = objc.super(SettingsWindow, self).init()
+        if self is None:
+            return None
         self.window = None
         self.settings = Settings.shared()
+        self.terminal_popup = None
+        self.schedule_popup = None
+        self.lang_popup = None
+        return self
 
     def show(self):
         if self.window and self.window.isVisible():
@@ -98,6 +105,7 @@ class SettingsWindow:
             AppKit.NSBackingStoreBuffered,
             False,
         )
+        self.window.setReleasedWhenClosed_(False)
         self.window.setTitle_("Little Claude — Settings")
         self.window.center()
 
@@ -142,7 +150,7 @@ class SettingsWindow:
         save_btn.setTitle_("Save")
         save_btn.setBezelStyle_(AppKit.NSBezelStyleRounded)
         save_btn.setTarget_(self)
-        save_btn.setAction_(objc.selector(self.saveSettings_, signature=b'v@:@'))
+        save_btn.setAction_("saveSettings:")
         content.addSubview_(save_btn)
 
         self.window.makeKeyAndOrderFront_(None)

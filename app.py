@@ -199,7 +199,7 @@ class AppDelegate(AppKit.NSObject):
     def applicationDidFinishLaunching_(self, notification):
         # Initialize settings
         self._settings = Settings.shared()
-        self._settings_window = SettingsWindow()
+        self._settings_window = SettingsWindow.alloc().init()
 
         # Merge all sprites and build cache
         all_sprites = {}
@@ -315,7 +315,10 @@ class AppDelegate(AppKit.NSObject):
         if terminal == "iTerm2":
             script = (
                 'tell application "iTerm2"\n'
-                '  create window with default profile command "claude"\n'
+                '  create window with default profile\n'
+                '  tell current session of current window\n'
+                '    write text "claude"\n'
+                '  end tell\n'
                 'end tell'
             )
         elif terminal == "Warp":
