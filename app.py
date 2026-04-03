@@ -10,6 +10,7 @@ import signal
 from config import (
     SPRITE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT,
     SPRITE_OFFSET_X, SPRITE_OFFSET_Y, TICK_INTERVAL, DOCK_Y_ADJUST,
+    PARTICLE_WINDOW_HEIGHT,
 )
 from sprite_renderer import SpriteCache
 from sprites.base import ALL as BASE_SPRITES
@@ -58,6 +59,13 @@ class CrabView(AppKit.NSView):
     def acceptsFirstMouse_(self, event):
         return True
 
+    def hitTest_(self, point):
+        """Only handle events on the sprite — clicks elsewhere pass through."""
+        if (SPRITE_OFFSET_X <= point.x <= SPRITE_OFFSET_X + SPRITE_SIZE and
+                SPRITE_OFFSET_Y <= point.y <= SPRITE_OFFSET_Y + SPRITE_SIZE):
+            return objc.super(CrabView, self).hitTest_(point)
+        return None
+
     def _hit_test(self, event):
         """Check if click is within the sprite area."""
         loc = self.convertPoint_fromView_(event.locationInWindow(), None)
@@ -101,8 +109,9 @@ class CrabView(AppKit.NSView):
         new_y = screen_loc.y - (self._drag_offset[1] - self._drag_start_pos[1])
         self.window().setFrameOrigin_((new_x, new_y))
 
-        # Update character position to match window
+        # Update character and particle overlay position
         delegate = AppKit.NSApp.delegate()
+        delegate.particle_window.setFrameOrigin_((new_x, new_y))
         delegate.character.x = new_x + WINDOW_WIDTH / 2
 
     def mouseUp_(self, event):
@@ -288,7 +297,34 @@ class AppDelegate(AppKit.NSObject):
         self.shadow_layer.setCornerRadius_(shadow_h / 2)
         self.content_layer.insertSublayer_below_(self.shadow_layer, self.sprite_layer)
 
+        # Particle overlay window (taller, for floating effects above the crab)
+        self.particle_window = AppKit.NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(
+            ((start_x, self.dock_y), (WINDOW_WIDTH, PARTICLE_WINDOW_HEIGHT)),
+            AppKit.NSWindowStyleMaskBorderless,
+            AppKit.NSBackingStoreBuffered,
+            False,
+        )
+        self.particle_window.setBackgroundColor_(AppKit.NSColor.clearColor())
+        self.particle_window.setOpaque_(False)
+        self.particle_window.setHasShadow_(False)
+        self.particle_window.setLevel_(
+            Quartz.CGWindowLevelForKey(Quartz.kCGMaximumWindowLevelKey)
+        )
+        self.particle_window.setCollectionBehavior_(
+            AppKit.NSWindowCollectionBehaviorFullScreenAuxiliary
+            | AppKit.NSWindowCollectionBehaviorStationary
+        )
+        self.particle_window.setIgnoresMouseEvents_(True)
+
+        particle_content = AppKit.NSView.alloc().initWithFrame_(
+            ((0, 0), (WINDOW_WIDTH, PARTICLE_WINDOW_HEIGHT))
+        )
+        particle_content.setWantsLayer_(True)
+        self.particle_window.setContentView_(particle_content)
+        self.particle_content_layer = particle_content.layer()
+
         self.window.makeKeyAndOrderFront_(None)
+        self.particle_window.orderFront_(None)
         AppKit.NSApp.setActivationPolicy_(AppKit.NSApplicationActivationPolicyAccessory)
 
         # Track current sprite for change detection
@@ -406,9 +442,9 @@ class AppDelegate(AppKit.NSObject):
         # Handle gravity drop
         if self.gravity_drop:
             new_y, done = self.gravity_drop.update(dt)
-            self.window.setFrameOrigin_((
-                self.window.frame().origin.x, new_y
-            ))
+            origin_x = self.window.frame().origin.x
+            self.window.setFrameOrigin_((origin_x, new_y))
+            self.particle_window.setFrameOrigin_((origin_x, new_y))
             if done:
                 self.gravity_drop = None
                 self.character._enter_idle()
@@ -447,6 +483,7 @@ class AppDelegate(AppKit.NSObject):
             window_x = result["x"] - WINDOW_WIDTH / 2
             window_y = self.dock_y + result["y_offset"]
             self.window.setFrameOrigin_((window_x, window_y))
+            self.particle_window.setFrameOrigin_((window_x, window_y))
 
         # Keep speech bubble following the crab
         self.speech.update_position(result["x"], self.dock_y + result["y_offset"])
@@ -546,7 +583,7 @@ class AppDelegate(AppKit.NSObject):
             layer.setFontSize_(12)
             layer.setAlignmentMode_(Quartz.kCAAlignmentCenter)
             layer.setContentsScale_(2.0)
-            self.content_layer.addSublayer_(layer)
+            self.particle_content_layer.addSublayer_(layer)
             self.particle_layers.append(layer)
 
         for i, p in enumerate(active):

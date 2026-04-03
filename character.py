@@ -327,9 +327,11 @@ class Character:
 
         self.phase_index += 1
 
-        # Special case: sleeping loops its last phase during sleep hours
+        # Sleeping only loops during deep_sleep hours; otherwise it's a short nap
         if self.state == "sleeping" and self.phase_index >= len(activity):
-            self.phase_index = len(activity) - 1  # stay on sleep loop
+            from schedule import get_period
+            if get_period() == "deep_sleep":
+                self.phase_index = len(activity) - 1  # stay on sleep loop
 
         if self.phase_index >= len(activity):
             self._enter_idle()

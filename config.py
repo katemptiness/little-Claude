@@ -5,9 +5,10 @@ GRID = 16
 PIXEL_SCALE = 5
 SPRITE_SIZE = GRID * PIXEL_SCALE  # 80
 
-# Window size (larger than sprite to allow particles above)
+# Window size (interactive crab area — particles render in a separate overlay)
 WINDOW_WIDTH = 200
-WINDOW_HEIGHT = 300
+WINDOW_HEIGHT = SPRITE_SIZE + 10  # 90, just the sprite + small margin
+PARTICLE_WINDOW_HEIGHT = 300      # overlay for particle effects
 # Sprite is centered horizontally, at the bottom of the window
 SPRITE_OFFSET_X = (WINDOW_WIDTH - SPRITE_SIZE) // 2
 SPRITE_OFFSET_Y = 0  # bottom of window
