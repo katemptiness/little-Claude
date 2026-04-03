@@ -32,8 +32,7 @@ class SpeechBubble:
             Quartz.CGWindowLevelForKey(Quartz.kCGMaximumWindowLevelKey)
         )
         self.window.setCollectionBehavior_(
-            AppKit.NSWindowCollectionBehaviorCanJoinAllSpaces
-            | AppKit.NSWindowCollectionBehaviorFullScreenAuxiliary
+            AppKit.NSWindowCollectionBehaviorFullScreenAuxiliary
             | AppKit.NSWindowCollectionBehaviorStationary
         )
         self.window.setIgnoresMouseEvents_(True)
