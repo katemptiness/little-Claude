@@ -106,6 +106,17 @@ ACTIVITIES = {
               message="жонглирует!"),
         Phase(["idle"], 500, 1000),
     ],
+    "summoning": [
+        Phase(["magic_hold"], 500, 1000, message="достаёт палочку..."),
+        Phase(["magic_raise"], 300, 1200, message="кого бы призвать...",
+              bounce=True),
+        Phase(["magic_cast"], 150, 800, message="✨ ПРИЗЫВ!",
+              shake=True, special="summon_friend"),
+        Phase(["happy"], 500, 3000, special="friend_chat"),
+        Phase(["idle"], 500, 4000, special="friend_play"),
+        Phase(["happy"], 500, 2500, special="friend_bye"),
+        Phase(["idle"], 500, 2000, special="friend_gone"),
+    ],
 }
 
 # Random outcomes
@@ -128,6 +139,21 @@ MAGIC_RESULTS = [
     {"text": "пуф! 💨", "particles": "poof"},
 ]
 
+
+FRIEND_PHRASES = [
+    "о! привет, друг!", "как дела?", "давно не виделись!",
+    "что нового?", "привет-привет!",
+]
+
+FRIEND_TOGETHER = [
+    "*обнимаются*", "вместе веселее!", "ты мой лучший друг!",
+    "расскажи что-нибудь!", "а помнишь?...",
+]
+
+FRIEND_AFTER = [
+    "было весело!", "приходи ещё!", "скучаю уже...",
+    "до встречи!", "хороший был день :3",
+]
 
 IDLE_PHRASES = [
     "скучно...", "хм...", ":3", "думаю о рыбке...",
@@ -174,7 +200,8 @@ class Character:
 
         # Idle phrases
         self.idle_phrase_timer = 0.0
-        self.idle_phrase_cooldown = random.uniform(45000, 90000)
+        self.idle_phrase_cooldown = 0.0
+        self._update_phrase_cooldown()
 
         # Blink
         self.is_blinking = False
@@ -189,6 +216,10 @@ class Character:
 
         # Reaction state
         self.reaction_duration = 0
+
+        # Friend summoning
+        self.friend_visible = False
+        self.friend_sprite = "idle"
 
         # Events emitted this tick
         self.events = []
@@ -220,7 +251,15 @@ class Character:
             "facing_right": self.facing_right,
             "events": self.events,
             "message": self.current_message,
+            "friend_visible": self.friend_visible,
+            "friend_sprite": self.friend_sprite,
         }
+
+    def _update_phrase_cooldown(self):
+        from settings import Settings, SPEECH_COOLDOWNS
+        interval = Settings.shared().speech_interval
+        lo, hi = SPEECH_COOLDOWNS.get(interval, (45000, 75000))
+        self.idle_phrase_cooldown = random.uniform(lo, hi)
 
     def _update_idle(self, dt):
         self.state_timer += dt
@@ -229,11 +268,10 @@ class Character:
         self.idle_phrase_timer += dt
         if self.idle_phrase_timer >= self.idle_phrase_cooldown:
             self.idle_phrase_timer = 0
-            self.idle_phrase_cooldown = random.uniform(45000, 90000)
-            if random.random() < 0.3:
-                phrase = t(random.choice(IDLE_PHRASES))
-                self.current_message = phrase
-                self.events.append(("message", phrase))
+            self._update_phrase_cooldown()
+            phrase = t(random.choice(IDLE_PHRASES))
+            self.current_message = phrase
+            self.events.append(("message", phrase))
 
         if self.state_timer > self.next_state_change:
             self._pick_next_activity()
@@ -343,6 +381,44 @@ class Character:
                 # Override phase frames to show confused face
                 activity[self.phase_index] = Phase(
                     ["fish_confused"], 500, 2500)
+
+        elif phase.special == "summon_friend":
+            self.friend_visible = True
+            self.friend_sprite = "idle"
+            self.facing_right = False  # face toward friend
+            for _ in range(6):
+                self.events.append(("particle", "poof"))
+            self.events.append(("friend_appear", None))
+
+        elif phase.special == "friend_chat":
+            self.friend_sprite = "happy"
+            msg = t(random.choice(FRIEND_PHRASES))
+            self.current_message = msg
+            self.events.append(("message", msg))
+
+        elif phase.special == "friend_play":
+            self.friend_sprite = "idle"
+            msg = t(random.choice(FRIEND_TOGETHER))
+            self.current_message = msg
+            self.events.append(("message", msg))
+            for _ in range(3):
+                self.events.append(("particle", "heart"))
+
+        elif phase.special == "friend_bye":
+            self.friend_sprite = "wave"
+            msg = t("пока-пока!")
+            self.current_message = msg
+            self.events.append(("message", msg))
+
+        elif phase.special == "friend_gone":
+            self.friend_visible = False
+            self.friend_sprite = "idle"
+            for _ in range(6):
+                self.events.append(("particle", "poof"))
+            self.events.append(("friend_leave", None))
+            msg = t(random.choice(FRIEND_AFTER))
+            self.current_message = msg
+            self.events.append(("message", msg))
 
     def _pick_next_activity(self):
         weights = get_weights()

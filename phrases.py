@@ -156,6 +156,26 @@ _EN = {
     "markdown! красиво": "markdown! beautiful",
     "минимализм! нравится": "minimalism! love it",
 
+    # Summoning / friend
+    "кого бы призвать...": "who should I summon...",
+    "✨ ПРИЗЫВ!": "✨ SUMMON!",
+    "о! привет, друг!": "oh! hi, friend!",
+    "как дела?": "how are you?",
+    "давно не виделись!": "long time no see!",
+    "что нового?": "what's new?",
+    "привет-привет!": "hello hello!",
+    "*обнимаются*": "*hugging*",
+    "вместе веселее!": "more fun together!",
+    "ты мой лучший друг!": "you're my best friend!",
+    "расскажи что-нибудь!": "tell me something!",
+    "а помнишь?..": "remember when?...",
+    "пока-пока!": "bye-bye!",
+    "было весело!": "that was fun!",
+    "приходи ещё!": "come back soon!",
+    "скучаю уже...": "miss you already...",
+    "до встречи!": "see you!",
+    "хороший был день :3": "good day :3",
+
     # Startup / system
     "*зевает*": "*yawns*",
 }

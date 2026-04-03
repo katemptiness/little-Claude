@@ -29,6 +29,11 @@ PALETTE = {
     9: (1.0, 0.843, 0.0, 1.0),       # gold #FFD700
 }
 
+# Friend palette — blue/teal crab
+FRIEND_PALETTE = dict(PALETTE)
+FRIEND_PALETTE[1] = (0.341, 0.627, 0.843, 1.0)   # body: blue #57A0D7
+FRIEND_PALETTE[3] = (0.627, 0.784, 0.941, 1.0)    # blush: light blue #A0C8F0
+
 # Timing
 FPS = 60
 TICK_INTERVAL = 1.0 / FPS

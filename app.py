@@ -207,6 +207,12 @@ class AppDelegate(AppKit.NSObject):
         all_sprites.update(ACTIVITY_SPRITES)
         self.sprite_cache = SpriteCache(all_sprites)
 
+        # Pre-render friend sprites (blue palette)
+        friend_sprite_names = ["idle", "blink", "happy", "love", "wave"]
+        for name in friend_sprite_names:
+            if name in all_sprites:
+                self.sprite_cache.add_friend(name, all_sprites[name])
+
         # Screen geometry
         self.dock_y = get_dock_top_y()
         screen = AppKit.NSScreen.mainScreen()
@@ -221,6 +227,9 @@ class AppDelegate(AppKit.NSObject):
 
         # Gravity drop animation
         self.gravity_drop = None
+
+        # Friend layer (for summoning activity)
+        self.friend_layer = None
 
         # System events
         self.system_events = SystemEventHandler(self.character)
@@ -411,8 +420,9 @@ class AppDelegate(AppKit.NSObject):
                 py = SPRITE_OFFSET_Y + SPRITE_SIZE
                 self.particles.add(event_data, px, py)
             elif event_type == "message":
-                if self.character.state.startswith("reaction_"):
-                    # Reactions show speech immediately
+                if self.character.state.startswith("reaction_") \
+                        or self.character.state == "summoning":
+                    # Reactions and summoning show speech immediately
                     self.speech.show(
                         event_data, result["x"], self.dock_y
                     )
@@ -420,6 +430,10 @@ class AppDelegate(AppKit.NSObject):
                     self.speech.maybe_show(
                         event_data, result["x"], self.dock_y
                     )
+            elif event_type == "friend_appear":
+                self._show_friend()
+            elif event_type == "friend_leave":
+                self._hide_friend()
 
         # Update particles
         self.particles.update(dt)
@@ -472,8 +486,46 @@ class AppDelegate(AppKit.NSObject):
                  (SPRITE_SIZE, SPRITE_SIZE))
             )
 
+        # Update friend layer
+        self._update_friend(result)
+
         # Render particles
         self._render_particles()
+
+    def _show_friend(self):
+        """Create and show the friend sprite layer."""
+        if self.friend_layer:
+            return
+        self.friend_layer = Quartz.CALayer.layer()
+        friend_x = SPRITE_OFFSET_X - 50
+        self.friend_layer.setFrame_(
+            ((friend_x, SPRITE_OFFSET_Y), (SPRITE_SIZE, SPRITE_SIZE))
+        )
+        self.friend_layer.setContents_(self.sprite_cache.get("friend_idle"))
+        self.friend_layer.setContentsGravity_(Quartz.kCAGravityResizeAspect)
+        self.friend_layer.setMagnificationFilter_(Quartz.kCAFilterNearest)
+        self.content_layer.insertSublayer_below_(
+            self.friend_layer, self.sprite_layer)
+
+    def _hide_friend(self):
+        """Remove the friend sprite layer."""
+        if self.friend_layer:
+            self.friend_layer.removeFromSuperlayer()
+            self.friend_layer = None
+
+    def _update_friend(self, result):
+        """Update friend sprite if visible."""
+        if not self.friend_layer:
+            return
+        if not result["friend_visible"]:
+            return
+        friend_sprite = f"friend_{result['friend_sprite']}"
+        if self.sprite_cache.has(friend_sprite):
+            Quartz.CATransaction.begin()
+            Quartz.CATransaction.setDisableActions_(True)
+            self.friend_layer.setContents_(
+                self.sprite_cache.get(friend_sprite))
+            Quartz.CATransaction.commit()
 
     def _render_particles(self):
         active = self.particles.get_active()

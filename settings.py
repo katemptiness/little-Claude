@@ -13,11 +13,28 @@ DEFAULTS = {
     "terminal": "Terminal",
     "schedule": "owl",
     "language": "ru",
+    "speech_interval": "1m",
 }
 
 TERMINAL_OPTIONS = ["Terminal", "iTerm2", "Warp"]
 SCHEDULE_OPTIONS = [("owl", "Сова / Night Owl"), ("lark", "Жаворонок / Early Bird")]
 LANGUAGE_OPTIONS = [("ru", "Русский"), ("en", "English")]
+SPEECH_OPTIONS = [
+    ("10s", "Часто / Often (10s)"),
+    ("1m", "Обычно / Normal (1 min)"),
+    ("10m", "Редко / Rarely (10 min)"),
+    ("30m", "Оч. редко / Very rarely (30 min)"),
+    ("1h", "Почти никогда / Almost never (1 hr)"),
+]
+
+# Cooldown ranges in ms for each speech interval
+SPEECH_COOLDOWNS = {
+    "10s": (8000, 12000),
+    "1m": (45000, 75000),
+    "10m": (500000, 700000),
+    "30m": (1500000, 2100000),
+    "1h": (3000000, 4200000),
+}
 
 
 class Settings:
@@ -77,6 +94,14 @@ class Settings:
         self._data["language"] = value
         set_language(value)
 
+    @property
+    def speech_interval(self):
+        return self._data["speech_interval"]
+
+    @speech_interval.setter
+    def speech_interval(self, value):
+        self._data["speech_interval"] = value
+
 
 class SettingsWindow(AppKit.NSObject):
     """A simple settings panel."""
@@ -90,6 +115,7 @@ class SettingsWindow(AppKit.NSObject):
         self.terminal_popup = None
         self.schedule_popup = None
         self.lang_popup = None
+        self.speech_popup = None
         return self
 
     def show(self):
@@ -97,7 +123,7 @@ class SettingsWindow(AppKit.NSObject):
             self.window.makeKeyAndOrderFront_(None)
             return
 
-        w, h = 320, 240
+        w, h = 320, 310
         self.window = AppKit.NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(
             ((200, 200), (w, h)),
             AppKit.NSWindowStyleMaskTitled
@@ -144,6 +170,18 @@ class SettingsWindow(AppKit.NSObject):
         idx = lang_keys.index(self.settings.language) \
             if self.settings.language in lang_keys else 0
         self.lang_popup.selectItemAtIndex_(idx)
+        y -= 40
+
+        # Speech frequency picker
+        self._add_label(content, "Speech frequency / Частота фраз:", 20, y)
+        y -= 28
+        speech_titles = [title for _, title in SPEECH_OPTIONS]
+        self.speech_popup = self._add_popup(
+            content, speech_titles, 20, y, 270)
+        speech_keys = [key for key, _ in SPEECH_OPTIONS]
+        idx = speech_keys.index(self.settings.speech_interval) \
+            if self.settings.speech_interval in speech_keys else 1
+        self.speech_popup.selectItemAtIndex_(idx)
 
         # Save button
         save_btn = AppKit.NSButton.alloc().initWithFrame_(((110, 12), (100, 32)))
@@ -170,6 +208,11 @@ class SettingsWindow(AppKit.NSObject):
         lang_keys = [key for key, _ in LANGUAGE_OPTIONS]
         self.settings.language = lang_keys[
             self.lang_popup.indexOfSelectedItem()]
+
+        # Speech frequency
+        speech_keys = [key for key, _ in SPEECH_OPTIONS]
+        self.settings.speech_interval = speech_keys[
+            self.speech_popup.indexOfSelectedItem()]
 
         self.settings.save()
         self.window.close()

@@ -1,11 +1,13 @@
 """Render 16x16 pixel grids to CGImage via CGContext."""
 
 import Quartz
-from config import GRID, PIXEL_SCALE, SPRITE_SIZE, PALETTE
+from config import GRID, PIXEL_SCALE, SPRITE_SIZE, PALETTE, FRIEND_PALETTE
 
 
-def render_sprite(grid):
+def render_sprite(grid, palette=None):
     """Render a 16x16 grid to an 80x80 CGImage."""
+    if palette is None:
+        palette = PALETTE
     cs = Quartz.CGColorSpaceCreateDeviceRGB()
     ctx = Quartz.CGBitmapContextCreate(
         None, SPRITE_SIZE, SPRITE_SIZE,
@@ -23,7 +25,7 @@ def render_sprite(grid):
         for col_idx, val in enumerate(row):
             if val == 0:
                 continue
-            r, g, b, a = PALETTE[val]
+            r, g, b, a = palette[val]
             Quartz.CGContextSetRGBFillColor(ctx, r, g, b, a)
             x = col_idx * PIXEL_SCALE
             y = row_idx * PIXEL_SCALE
@@ -45,6 +47,10 @@ class SpriteCache:
 
     def add(self, name, grid):
         self._cache[name] = render_sprite(grid)
+
+    def add_friend(self, name, grid):
+        """Render a sprite with the friend (blue) palette."""
+        self._cache[f"friend_{name}"] = render_sprite(grid, FRIEND_PALETTE)
 
     def has(self, name):
         return name in self._cache
