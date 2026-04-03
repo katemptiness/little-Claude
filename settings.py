@@ -12,7 +12,7 @@ SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
 DEFAULTS = {
     "terminal": "Terminal",
     "schedule": "owl",
-    "language": "ru",
+    "language": "en",
     "speech_interval": "1m",
 }
 

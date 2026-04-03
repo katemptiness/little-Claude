@@ -8,6 +8,12 @@
 
 A tiny pixel-art crab companion that lives on your macOS Dock. It reads books, catches fish, does magic, writes code, and generally goes about its little crab life — all on its own.
 
+<p align="center">
+  <img src="screens/screen1.png" width="280" alt="Little Claude juggling">
+  <img src="screens/screen2.png" width="280" alt="Little Claude idle">
+  <img src="screens/screen3.png" width="280" alt="Little Claude on the Dock">
+</p>
+
 **Little Claude is not a tamagotchi.** It has no needs, no health bars, no demands. It's a self-sufficient creature with its own schedule, moods, and activities. You're just an observer — and sometimes a friend.
 
 ## What it does
