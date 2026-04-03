@@ -91,7 +91,7 @@ Right-click → Settings to configure:
 |---------|---------|---------|
 | Claude Code terminal | Terminal, iTerm2, Warp | Terminal |
 | Schedule mode | Night Owl (sleep 4am–11am) / Early Bird (sleep 10pm–6am) | Night Owl |
-| Language | Русский / English | Русский |
+| Language | Русский / English | English |
 | Speech frequency | Often (10s) / Normal (1 min) / Rarely (10 min) / Very rarely (30 min) / Almost never (1 hr) | Normal |
 
 Settings are saved to `~/.claudy/settings.json`.
