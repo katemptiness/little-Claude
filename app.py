@@ -21,7 +21,9 @@ from animations import GravityDrop
 from system_events import SystemEventHandler
 from speech import SpeechBubble
 from settings import Settings, SettingsWindow
-from phrases import t
+from phrases import (t, format_phrase, GIFT_COLLECT_PHRASES,
+                     GIFT_ANNOUNCE_PHRASES, GIFT_EXPIRED_PHRASES)
+from memory import Memory
 
 
 def get_dock_top_y():
@@ -138,8 +140,18 @@ class CrabView(AppKit.NSView):
     def singleClickFired_(self, timer):
         if self._click_count == 1:
             delegate = AppKit.NSApp.delegate()
-            # Happy bounce + sparkles AND hearts
-            delegate.character.interrupt("happy_love")
+            try:
+                Memory.shared().record_click()
+            except Exception:
+                pass
+            # If a gift is on the dock, clicking Claudy collects it
+            if delegate.gift_layer:
+                delegate._collect_gift()
+                delegate.character.interrupt("happy")
+            elif Memory.shared().is_attached():
+                delegate.character.interrupt("happy_love")
+            else:
+                delegate.character.interrupt("happy")
         self._click_count = 0
 
     def mouseEntered_(self, event):
@@ -154,51 +166,50 @@ class CrabView(AppKit.NSView):
             delegate.character._enter_idle()
 
     def rightMouseDown_(self, event):
+        from phrases import get_language
+        ru = get_language() == "ru"
+
         menu = AppKit.NSMenu.alloc().initWithTitle_("Claudy")
 
-        open_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
-            "Open Claude", "openClaude:", "")
-        open_item.setTarget_(AppKit.NSApp.delegate())
-        menu.addItem_(open_item)
+        def _item(title_en, title_ru, action, key=""):
+            title = title_ru if ru else title_en
+            it = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+                title, action, key)
+            it.setTarget_(AppKit.NSApp.delegate())
+            return it
 
-        code_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
-            "Open Claude Code", "openClaudeCode:", "")
-        code_item.setTarget_(AppKit.NSApp.delegate())
-        menu.addItem_(code_item)
-
+        menu.addItem_(_item("Open Claude", "Открыть Claude", "openClaude:"))
+        menu.addItem_(_item("Open Claude Code", "Открыть Claude Code",
+                            "openClaudeCode:"))
         menu.addItem_(AppKit.NSMenuItem.separatorItem())
 
-        # Activities submenu (for previewing animations)
-        activities_menu = AppKit.NSMenu.alloc().initWithTitle_("Activities")
-        for name in sorted(ACTIVITIES.keys()):
-            item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
-                name.capitalize(), "playActivity:", "")
-            item.setTarget_(AppKit.NSApp.delegate())
-            item.setRepresentedObject_(name)
-            activities_menu.addItem_(item)
-        activities_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
-            "Activities", None, "")
-        activities_item.setSubmenu_(activities_menu)
-        menu.addItem_(activities_item)
+        # Activities submenu (dev mode only)
+        if Settings.shared().dev_mode:
+            act_title = "Активности" if ru else "Activities"
+            activities_menu = AppKit.NSMenu.alloc().initWithTitle_(act_title)
+            for name in sorted(ACTIVITIES.keys()):
+                item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+                    name.capitalize(), "playActivity:", "")
+                item.setTarget_(AppKit.NSApp.delegate())
+                item.setRepresentedObject_(name)
+                activities_menu.addItem_(item)
+            activities_menu.addItem_(AppKit.NSMenuItem.separatorItem())
+            tg_title = "Тест подарка" if ru else "Test Gift"
+            gift_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+                tg_title, "testGift:", "")
+            gift_item.setTarget_(AppKit.NSApp.delegate())
+            activities_menu.addItem_(gift_item)
 
+            activities_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+                act_title, None, "")
+            activities_item.setSubmenu_(activities_menu)
+            menu.addItem_(activities_item)
+            menu.addItem_(AppKit.NSMenuItem.separatorItem())
+
+        menu.addItem_(_item("Settings", "Настройки", "openSettings:"))
+        menu.addItem_(_item("About Claudy", "О Claudy", "showAbout:"))
         menu.addItem_(AppKit.NSMenuItem.separatorItem())
-
-        settings_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
-            "Settings", "openSettings:", "")
-        settings_item.setTarget_(AppKit.NSApp.delegate())
-        menu.addItem_(settings_item)
-
-        about_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
-            "About Claudy", "showAbout:", "")
-        about_item.setTarget_(AppKit.NSApp.delegate())
-        menu.addItem_(about_item)
-
-        menu.addItem_(AppKit.NSMenuItem.separatorItem())
-
-        quit_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
-            "Quit", "quitApp:", "q")
-        quit_item.setTarget_(AppKit.NSApp.delegate())
-        menu.addItem_(quit_item)
+        menu.addItem_(_item("Quit", "Выход", "quitApp:", "q"))
 
         AppKit.NSMenu.popUpContextMenu_withEvent_forView_(menu, event, self)
 
@@ -254,6 +265,13 @@ class AppDelegate(AppKit.NSObject):
 
         # Friend layer (for summoning activity)
         self.friend_layer = None
+
+        # Gift system
+        self.gift_layer = None
+        self.gift_timer = None  # expiry timer
+
+        # Initialize memory
+        Memory.shared()
 
         # System events
         self.system_events = SystemEventHandler(self.character)
@@ -414,18 +432,34 @@ class AppDelegate(AppKit.NSObject):
         self.character._enter_idle()
         self.character._start_activity(name)
 
+    def testGift_(self, sender):
+        """Drop a test gift on the dock."""
+        import random as _r
+        emojis = ["🐟", "🐡", "💎", "⭐", "🌸", "🦋"]
+        self._show_gift(
+            {"type": "test", "emoji": _r.choice(emojis)},
+            self.character.x)
+
     def openSettings_(self, sender):
         """Open the settings window."""
         self._settings_window.show()
 
     def showAbout_(self, sender):
+        from phrases import get_language
         alert = AppKit.NSAlert.alloc().init()
         alert.setMessageText_("Claudy")
-        alert.setInformativeText_(
-            "A little pixel crab companion for your desktop.\n\n"
-            "Made by katemptiness & Claude Opus\n"
-            "with love and PyObjC."
-        )
+        if get_language() == "ru":
+            alert.setInformativeText_(
+                "Маленький пиксельный краб-компаньон.\n\n"
+                "Сделано katemptiness & Claude Opus\n"
+                "с любовью и PyObjC."
+            )
+        else:
+            alert.setInformativeText_(
+                "A little pixel crab companion for your desktop.\n\n"
+                "Made by katemptiness & Claude Opus\n"
+                "with love and PyObjC."
+            )
         alert.runModal()
 
     def tick_(self, timer):
@@ -484,8 +518,9 @@ class AppDelegate(AppKit.NSObject):
                 self.particles.add(event_data, px, py)
             elif event_type == "message":
                 if self.character.state.startswith("reaction_") \
-                        or self.character.state in ("summoning", "fishing"):
-                    # Reactions, summoning, fishing show speech immediately
+                        or self.character.state in ("summoning", "fishing",
+                                                    "telescope"):
+                    # Reactions, summoning, fishing, telescope show immediately
                     self.speech.show(
                         event_data, result["x"], self.dock_y
                     )
@@ -497,6 +532,17 @@ class AppDelegate(AppKit.NSObject):
                 self._show_friend()
             elif event_type == "friend_leave":
                 self._hide_friend()
+            elif event_type == "gift":
+                try:
+                    self._show_gift(event_data, result["x"])
+                except Exception:
+                    pass  # never let gift crash freeze the app
+            elif event_type == "gift_star":
+                try:
+                    name = event_data or ""
+                    Memory.shared().add_gift("star", "⭐", name=name)
+                except Exception:
+                    pass
 
         # Update particles
         self.particles.update(dt)
@@ -576,6 +622,99 @@ class AppDelegate(AppKit.NSObject):
         if self.friend_layer:
             self.friend_layer.removeFromSuperlayer()
             self.friend_layer = None
+
+    # --- Gift system ---
+    # Gift rendered as a CATextLayer on the main content_layer.
+    # No separate windows. Clicking Claudy while a gift is visible collects it.
+
+    def _show_gift(self, data, crab_x):
+        """Show a gift emoji next to the crab on the main window."""
+        try:
+            if self.gift_layer:
+                return  # already showing a gift
+
+            if Memory.shared().get_pending_gift():
+                return
+
+            # Check daily limit
+            from settings import Settings, GIFT_DURATIONS
+            limit = Settings.shared().gift_limit
+            if limit > 0:
+                today_gifts = sum(
+                    1 for g in Memory.shared()._data["gifts"]
+                    if g.get("date") == Memory.shared()._data["today"]["date"])
+                if today_gifts >= limit:
+                    return
+
+            Memory.shared().add_gift(data["type"], data["emoji"])
+
+            # Render as CATextLayer on the existing content_layer
+            layer = Quartz.CATextLayer.layer()
+            layer.setString_(str(data["emoji"]))
+            layer.setFontSize_(20)
+            layer.setAlignmentMode_(Quartz.kCAAlignmentCenter)
+            layer.setContentsScale_(2.0)
+            gift_x = SPRITE_OFFSET_X + SPRITE_SIZE + 5
+            layer.setFrame_(((gift_x, SPRITE_OFFSET_Y), (30, 30)))
+            self.content_layer.addSublayer_(layer)
+            self.gift_layer = layer
+
+            # Pause activities
+            self.character.gift_waiting = True
+            self.character._enter_idle()
+
+            # Persistent announcement
+            name = Settings.shared().user_name
+            duration = GIFT_DURATIONS.get(
+                Settings.shared().gift_duration, 300)
+            phrase = format_phrase(
+                random.choice(GIFT_ANNOUNCE_PHRASES), name=name)
+            self.speech.show_persistent(
+                phrase, crab_x, self.dock_y, duration=float(duration))
+
+            # Expiry timer
+            if self.gift_timer:
+                self.gift_timer.invalidate()
+            self.gift_timer = AppKit.NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
+                float(duration), self, "giftExpired:", None, False,
+            )
+        except Exception:
+            import traceback
+            try:
+                with open(os.path.expanduser("~/.claudy/error.log"), "a") as ef:
+                    ef.write("=== _show_gift error ===\n")
+                    traceback.print_exc(file=ef)
+            except Exception:
+                pass
+
+    def giftExpired_(self, timer):
+        """Gift timer expired — user didn't collect in time."""
+        self._hide_gift()
+        Memory.shared().collect_gift()
+        self.speech.clear_persistent()
+        self.character.gift_waiting = False
+        phrase = format_phrase(random.choice(GIFT_EXPIRED_PHRASES))
+        self.speech.show(phrase, self.character.x, self.dock_y)
+
+    def _hide_gift(self):
+        """Remove the gift layer and cancel timer."""
+        if self.gift_layer:
+            self.gift_layer.removeFromSuperlayer()
+            self.gift_layer = None
+        if self.gift_timer:
+            self.gift_timer.invalidate()
+            self.gift_timer = None
+
+    def _collect_gift(self):
+        """Collect the pending gift — called when clicking Claudy."""
+        gift = Memory.shared().collect_gift()
+        if not gift:
+            return
+        self._hide_gift()
+        self.character.gift_waiting = False
+        self.speech.clear_persistent()
+        phrase = format_phrase(random.choice(GIFT_COLLECT_PHRASES))
+        self.speech.show(phrase, self.character.x, self.dock_y)
 
     def _update_friend(self, result):
         """Update friend sprite if visible."""

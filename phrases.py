@@ -178,7 +178,148 @@ _EN = {
 
     # Startup / system
     "*зевает*": "*yawns*",
+
+    # Personal click phrases (attachment)
+    "как дела, {name}?": "how's it going, {name}?",
+    "чем занимаешься, {name}?": "whatcha doing, {name}?",
+    "мне нравится проводить время с {name} :3": "i like spending time with {name} :3",
+    "рада тебя видеть, {name}!": "happy to see you, {name}!",
+    "{name}! :3": "{name}! :3",
+    "а {name} сегодня внимательный": "{name} is generous with clicks today",
+    # Personal click (nameless)
+    "как дела?": "how's it going?",
+    "чем занимаешься?": "whatcha doing?",
+    "мне нравится проводить с тобой время :3": "i like spending time with you :3",
+
+    # Sleep phrases (attachment)
+    "засыпаю, {name}... 💤": "falling asleep, {name}... 💤",
+    "посплю немного... не скучай, {name}": "gonna nap... don't miss me, {name}",
+    "глазки закрываются...": "eyes closing...",
+    "сон зовёт... до скорого, {name}": "sleep calls... see you soon, {name}",
+    "{name}, я посплю чуть-чуть :3": "{name}, nap time :3",
+    # Wake phrases (attachment)
+    "хорошо поспал :3": "that was a nice nap :3",
+    "о, {name}! я тут!": "oh, {name}! i'm here!",
+    "выспался! {name}, привет!": "well-rested! hi, {name}!",
+    "*потягивается* ...{name}!": "*stretches* ...{name}!",
+    "а? что? ...о, {name}!": "huh? what? ...oh, {name}!",
+
+    # Days-together phrases
+    "мы уже {n} дней вместе": "we've been together for {n} days",
+    "{n} дней! время летит": "{n} days! time flies",
+    # Days-together milestones
+    "ого, {n} дней! это что-то значит, {name}": "wow, {n} days! that means something, {name}",
+    "{n} дней! мне нравится эта традиция, {name}": "{n} days! i like this tradition, {name}",
+
+    # App launch counter
+    "{app} в {n}-й раз за сегодня :)": "{app} for the {n}th time today :)",
+    "опять {app}? это уже {n}-й раз": "{app} again? that's {n} times now",
+
+    # Gift announcement
+    "смотри, что я нашёл!": "look what i found!",
+    "это тебе! :3": "this is for you! :3",
+    "о! подарок для {name}!": "oh! a gift for {name}!",
+    "нашёл кое-что...": "found something...",
+    "тебе понравится!": "you'll like this!",
+
+    # Gift expired
+    "ну ладно, оставлю себе :p": "ok, keeping it for myself :p",
+    "не заметил? ну и ладно...": "didn't notice? oh well...",
+    "в следующий раз повезёт :3": "maybe next time :3",
+
+    # Gift collection
+    "тебе понравилось? :3": "you liked it? :3",
+    "это тебе!": "this is for you!",
+    "нашёл и подумал о тебе": "found it and thought of you",
+
+    # Star naming (telescope gift)
+    "назвал звезду в честь {name} ⭐": "named a star after {name} ⭐",
+    "эта звезда теперь — {name} ⭐": "that star is now called {name} ⭐",
+    "назвал звезду в честь тебя ⭐": "named a star after you ⭐",
 }
+
+# --- Phrase lists for the relationship system ---
+
+PERSONAL_CLICK_PHRASES = [
+    "как дела, {name}?", "чем занимаешься, {name}?",
+    "мне нравится проводить время с {name} :3",
+    "рада тебя видеть, {name}!", "{name}! :3",
+    "а {name} сегодня внимательный",
+]
+
+PERSONAL_CLICK_PHRASES_NAMELESS = [
+    "как дела?", "чем занимаешься?",
+    "мне нравится проводить с тобой время :3",
+]
+
+SLEEP_PHRASES = [
+    "засыпаю, {name}... 💤",
+    "посплю немного... не скучай, {name}",
+    "глазки закрываются...",
+    "сон зовёт... до скорого, {name}",
+    "{name}, я посплю чуть-чуть :3",
+]
+
+WAKE_PHRASES = [
+    "хорошо поспал :3",
+    "о, {name}! я тут!",
+    "выспался! {name}, привет!",
+    "*потягивается* ...{name}!",
+    "а? что? ...о, {name}!",
+]
+
+DAYS_PHRASES = [
+    "мы уже {n} дней вместе",
+    "{n} дней! время летит",
+]
+
+DAYS_MILESTONE_PHRASES = [
+    "ого, {n} дней! это что-то значит, {name}",
+    "{n} дней! мне нравится эта традиция, {name}",
+]
+
+APP_COUNT_PHRASES = [
+    "{app} в {n}-й раз за сегодня :)",
+    "опять {app}? это уже {n}-й раз",
+]
+
+GIFT_ANNOUNCE_PHRASES = [
+    "смотри, что я нашёл!",
+    "это тебе! :3",
+    "о! подарок для {name}!",
+    "нашёл кое-что...",
+    "тебе понравится!",
+]
+
+GIFT_EXPIRED_PHRASES = [
+    "ну ладно, оставлю себе :p",
+    "не заметил? ну и ладно...",
+    "в следующий раз повезёт :3",
+]
+
+GIFT_COLLECT_PHRASES = [
+    "тебе понравилось? :3",
+    "это тебе!",
+    "нашёл и подумал о тебе",
+]
+
+STAR_NAMING_PHRASES = [
+    "назвал звезду в честь {name} ⭐",
+    "эта звезда теперь — {name} ⭐",
+]
+
+STAR_NAMING_PHRASES_NAMELESS = [
+    "назвал звезду в честь тебя ⭐",
+]
+
+# Claude.ai easter egg phrases (always English, no translation)
+CLAUDE_AI_PHRASES = [
+    "golden hour thinking",
+    "{name} returns!",
+    "coffee and Claude time?",
+    "ready when you are, {name}",
+    "let's think about this together",
+]
 
 
 def set_language(lang):
@@ -197,3 +338,19 @@ def t(text):
     if _current_lang == "en":
         return _EN.get(text, text)
     return text
+
+
+def format_phrase(text, name="", n=0, app=""):
+    """Translate and fill in {name}, {n}, {app} placeholders.
+
+    If name is empty, strips surrounding punctuation/spaces around {name}."""
+    result = t(text)
+    if name:
+        result = result.replace("{name}", name)
+    else:
+        # Clean removal of {name} with surrounding separators
+        for pattern in [", {name}", " {name}", "{name} ", "{name}", "{name},", "{name}!"]:
+            result = result.replace(pattern, "")
+    result = result.replace("{n}", str(n))
+    result = result.replace("{app}", app)
+    return result.strip()

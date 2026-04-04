@@ -16,6 +16,7 @@ class SpeechBubble:
         self.show_chance = 1.0  # frequency controlled by character timer
         self._hide_timer = None
         self._visible = False
+        self._persistent = False  # blocks other messages while True
 
     def setup(self):
         """Create the speech bubble window (call after NSApp is running)."""
@@ -65,7 +66,7 @@ class SpeechBubble:
 
     def maybe_show(self, text, crab_x, crab_y):
         """Show the bubble with probability check and rate limiting."""
-        if not self.window:
+        if not self.window or self._persistent:
             return
 
         now = time.time() * 1000
@@ -80,7 +81,7 @@ class SpeechBubble:
 
     def show(self, text, crab_x, crab_y):
         """Show the speech bubble immediately (bypasses rate limit)."""
-        if not self.window:
+        if not self.window or self._persistent:
             return
 
         self.last_shown = time.time() * 1000
@@ -112,11 +113,50 @@ class SpeechBubble:
             display_time, self, "hideBubble:", None, False,
         )
 
+    def show_persistent(self, text, crab_x, crab_y, duration=300.0):
+        """Show a persistent bubble that blocks other messages."""
+        if not self.window:
+            return
+        self._persistent = True
+        self.last_shown = time.time() * 1000
+        self._visible = True
+
+        width = max(80, min(200, len(text) * 9 + 20))
+        self.window.setContentSize_((width, 40))
+        self.text_field.setFrame_(((8, 6), (width - 16, 28)))
+        self.text_field.setStringValue_(text)
+
+        bubble_x = crab_x - width / 2
+        bubble_y = crab_y + 90
+        self.window.setFrameOrigin_((bubble_x, bubble_y))
+
+        self.window.orderFront_(None)
+        AppKit.NSAnimationContext.beginGrouping()
+        AppKit.NSAnimationContext.currentContext().setDuration_(0.3)
+        self.window.animator().setAlphaValue_(1.0)
+        AppKit.NSAnimationContext.endGrouping()
+
+        if self._hide_timer:
+            self._hide_timer.invalidate()
+        self._hide_timer = AppKit.NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
+            duration, self, "hideBubble:", None, False,
+        )
+
+    def clear_persistent(self):
+        """Clear persistent mode and hide the bubble."""
+        if self._persistent:
+            self._persistent = False
+            if self._hide_timer:
+                self._hide_timer.invalidate()
+                self._hide_timer = None
+            self.hideBubble_(None)
+
     def hideBubble_(self, timer):
         """Fade out the speech bubble."""
         if not self._visible:
             return
         self._visible = False
+        self._persistent = False
         AppKit.NSAnimationContext.beginGrouping()
         AppKit.NSAnimationContext.currentContext().setDuration_(0.5)
         self.window.animator().setAlphaValue_(0)

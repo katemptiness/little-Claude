@@ -3,7 +3,7 @@
 import random
 from config import WINDOW_WIDTH, SPRITE_SIZE
 from schedule import get_weights
-from phrases import t
+from phrases import t, format_phrase
 
 
 class Phase:
@@ -95,7 +95,7 @@ ACTIVITIES = {
         Phase(["telescope_a"], 500, 1000, message="достаёт телескоп..."),
         Phase(["telescope_a", "telescope_b"], 600, 4000, message="космос...",
               particle="star", particle_interval_ms=1500),
-        Phase(["idle"], 500, 1000),
+        Phase(["idle"], 500, 1000, special="star_gaze"),
     ],
     "meditating": [
         Phase(["meditate_a"], 500, 120000, duration_max_ms=300000,
@@ -223,6 +223,9 @@ class Character:
         self.play_jump_timer = 0.0
         self.play_jump_direction = 1
 
+        # Gift pause — stops activity transitions while waiting for user
+        self.gift_waiting = False
+
         # Friend summoning
         self.friend_visible = False
         self.friend_sprite = "idle"
@@ -267,6 +270,36 @@ class Character:
         lo, hi = SPEECH_COOLDOWNS.get(interval, (45000, 75000))
         self.idle_phrase_cooldown = random.uniform(lo, hi)
 
+    def _pick_idle_phrase(self):
+        """Pick an idle phrase — may be days-together or claude.ai easter egg."""
+        from memory import Memory
+        from settings import Settings
+        from phrases import (DAYS_PHRASES, DAYS_MILESTONE_PHRASES,
+                             CLAUDE_AI_PHRASES)
+        name = Settings.shared().user_name
+        mem = Memory.shared()
+
+        # ~20% chance: days-together phrase (once per day)
+        if not mem.days_phrase_shown_today() and random.random() < 0.2:
+            days = mem.get_total_days()
+            if days >= 2:
+                mem.mark_days_phrase_shown()
+                if mem.is_milestone_day():
+                    pool = DAYS_MILESTONE_PHRASES
+                else:
+                    pool = DAYS_PHRASES
+                return format_phrase(random.choice(pool), name=name, n=days)
+
+        # ~10% chance: claude.ai easter egg (always English)
+        if random.random() < 0.1:
+            phrase = random.choice(CLAUDE_AI_PHRASES)
+            if name:
+                return phrase.replace("{name}", name)
+            return phrase.replace("{name} ", "").replace(", {name}", "").replace("{name}", "")
+
+        # Normal idle phrase
+        return t(random.choice(IDLE_PHRASES))
+
     def _update_idle(self, dt):
         self.state_timer += dt
 
@@ -275,11 +308,11 @@ class Character:
         if self.idle_phrase_timer >= self.idle_phrase_cooldown:
             self.idle_phrase_timer = 0
             self._update_phrase_cooldown()
-            phrase = t(random.choice(IDLE_PHRASES))
+            phrase = self._pick_idle_phrase()
             self.current_message = phrase
             self.events.append(("message", phrase))
 
-        if self.state_timer > self.next_state_change:
+        if self.state_timer > self.next_state_change and not self.gift_waiting:
             self._pick_next_activity()
 
     def _update_walking(self, dt):
@@ -340,7 +373,7 @@ class Character:
                 self.phase_index = len(activity) - 1  # stay on sleep loop
 
         if self.phase_index >= len(activity):
-            self._enter_idle()
+            self._enter_idle(from_sleeping=(self.state == "sleeping"))
             return
 
         phase = activity[self.phase_index]
@@ -376,6 +409,13 @@ class Character:
             self.events.append(("message", msg))
             for _ in range(8):
                 self.events.append(("particle", result["particles"]))
+            # Gift chance (~20%) for non-poof results
+            if result["particles"] != "poof" and random.random() < 0.2:
+                emoji_map = {"flower": "🌸", "butterfly": "🦋", "rainbow": "🌈",
+                             "star": "⭐"}
+                gift_emoji = emoji_map.get(result["particles"], "✨")
+                self.events.append(("gift", {
+                    "type": "magic", "emoji": gift_emoji}))
 
         elif phase.special == "fish_reveal":
             catch = random.choice(CATCHES)
@@ -384,6 +424,10 @@ class Character:
             self.events.append(("message", msg))
             for _ in range(5):
                 self.events.append(("particle", catch["particles"]))
+            # Gift chance (~30%) for good catches
+            if catch["reaction"] in ("happy", "love") and random.random() < 0.3:
+                self.events.append(("gift", {
+                    "type": "fish", "emoji": catch["emoji"]}))
             # Set reaction sprite (always preserve fish_reveal special for next run)
             if catch["reaction"] == "confused":
                 activity[self.phase_index] = Phase(
@@ -391,6 +435,22 @@ class Character:
             else:
                 activity[self.phase_index] = Phase(
                     ["fish_happy"], 500, 2500, special="fish_reveal")
+
+        elif phase.special == "star_gaze":
+            # ~20% chance to name a star after the user
+            if random.random() < 0.2:
+                from settings import Settings
+                from phrases import STAR_NAMING_PHRASES, STAR_NAMING_PHRASES_NAMELESS
+                name = Settings.shared().user_name
+                if name:
+                    msg = format_phrase(random.choice(STAR_NAMING_PHRASES), name=name)
+                else:
+                    msg = format_phrase(random.choice(STAR_NAMING_PHRASES_NAMELESS))
+                self.current_message = msg
+                self.events.append(("message", msg))
+                self.events.append(("gift_star", name or ""))
+                for _ in range(5):
+                    self.events.append(("particle", "star"))
 
         elif phase.special == "play_jump":
             self.is_playing_jump = True
@@ -461,11 +521,23 @@ class Character:
         else:
             self._start_activity(chosen)
 
-    def _enter_idle(self):
+    def _enter_idle(self, from_sleeping=False):
+        # Wake greeting when coming out of sleep
+        if from_sleeping:
+            from memory import Memory
+            from settings import Settings
+            from phrases import WAKE_PHRASES
+            if Memory.shared().is_attached():
+                n = Settings.shared().user_name
+                msg = format_phrase(random.choice(WAKE_PHRASES), name=n)
+                self.current_message = msg
+                self.events.append(("message", msg))
+
         self.state = "idle"
         self.state_timer = 0
         self.next_state_change = random.uniform(8000, 20000)
-        self.current_message = None
+        if not from_sleeping:
+            self.current_message = None
         self.is_playing_jump = False
 
     def _start_walking(self):
@@ -486,6 +558,17 @@ class Character:
         self.frame_index = 0
         self.particle_timer = 0
         self.current_message = None
+
+        # Sleep greeting when attached
+        if name == "sleeping":
+            from memory import Memory
+            from settings import Settings
+            from phrases import SLEEP_PHRASES
+            if Memory.shared().is_attached():
+                n = Settings.shared().user_name
+                msg = format_phrase(random.choice(SLEEP_PHRASES), name=n)
+                self.current_message = msg
+                self.events.append(("message", msg))
 
         phase = ACTIVITIES[name][0]
         if phase.duration_max_ms:
@@ -630,9 +713,22 @@ class Character:
             self.reaction_duration = 3000
             self.is_bouncing = True
             self.bounce_phase = 0
-            self.current_message = t(random.choice(
-                ["привет! :3", "о!", "рада тебя видеть", ":3", "♥"]
-            ))
+            # Personal phrases when attached
+            from memory import Memory
+            from settings import Settings
+            from phrases import (PERSONAL_CLICK_PHRASES,
+                                 PERSONAL_CLICK_PHRASES_NAMELESS)
+            base_phrases = ["привет! :3", "о!", "рада тебя видеть", ":3", "♥"]
+            name = Settings.shared().user_name
+            if Memory.shared().is_attached():
+                if name:
+                    personal = random.choice(PERSONAL_CLICK_PHRASES)
+                else:
+                    personal = random.choice(PERSONAL_CLICK_PHRASES_NAMELESS)
+                phrase = format_phrase(personal, name=name)
+            else:
+                phrase = t(random.choice(base_phrases))
+            self.current_message = phrase
             self.events.append(("message", self.current_message))
             for _ in range(4):
                 self.events.append(("particle", "sparkle"))

@@ -18,14 +18,16 @@ A tiny pixel-art crab companion that lives on your macOS Dock. It reads books, c
 
 ## What it does
 
-- Wanders along the Dock, performing 14 different activities: reading, fishing, magic, coding, sleeping, playing, painting, stargazing, meditating, juggling, listening to music, and summoning a friend
+- Wanders along the Dock, performing 12 different activities: reading, fishing, magic, coding, sleeping, playing, painting, stargazing, meditating, juggling, listening to music, and summoning a friend
 - Follows a configurable schedule — night owl (default) or early bird mode
-- Reacts to clicks (sparkles + hearts!), hover (waves hello), and drag-and-drop (surprise + gravity bounce)
+- Reacts to clicks (sparkles → hearts!), hover (waves hello), and drag-and-drop (surprise + gravity bounce)
 - Mirrors your activity — open a terminal or code editor and the crab starts coding; open Spotify and it listens to music
-- Notices when you launch apps and comments on them
-- Sleeps when your Mac sleeps, yawns when it wakes up
+- Notices when you launch apps and comments on them (remembers how many times you opened the same app today)
+- Sleeps when your Mac sleeps, greets you when it wakes up
+- Gives you gifts — catches a fish? Finds a star? Might leave it on the Dock for you
+- Gradually notices you — click enough and Claudy starts using your name, showing hearts, and saying personal things
+- Remembers how many days you've been together and occasionally mentions it
 - Says things in cute speech bubbles — in Russian or English (configurable)
-- Occasionally mutters to itself while idling ("thinking about fish...", "bored...", ":3")
 - All rendered as pixel art: 16x16 sprite grids scaled to 80x80px
 
 ## Installation
@@ -57,10 +59,46 @@ Requires macOS with Python 3.10+ and the Dock positioned at the bottom of the sc
 | Action | What happens |
 |--------|-------------|
 | Hover | Waves hello |
-| Click | Happy bounce + sparkles + hearts |
+| Click | Happy bounce + sparkles (before attachment) or hearts (after) |
+| Click (with gift) | Collects the gift — Claudy reacts happily |
 | Double-click | Opens Claude.app |
 | Drag & drop | Surprised face, falls back to Dock with gravity |
-| Right-click | Context menu (Open Claude, Open Claude Code, Activities, Settings, About Claudy, Quit) |
+| Right-click | Context menu (Open Claude, Open Claude Code, Settings, About Claudy, Quit) |
+
+## Relationships
+
+Claudy doesn't demand attention — but it notices when you're there.
+
+### Attachment
+
+There's an invisible threshold: **5 clicks per day** (resets each session). Before the threshold, clicks produce sparkles. After it, you unlock:
+
+- **Hearts** instead of sparkles on click
+- **Personal phrases** that use your name ("how's it going, Kate?", "i like spending time with Kate :3")
+- **Sleep/wake greetings** ("falling asleep, Kate... 💤", "that was a nice nap :3")
+
+If you don't click — nothing changes. Claudy is perfectly happy on its own.
+
+### Gifts
+
+During some activities, Claudy may find something and leave it on the Dock for you:
+
+| Activity | Gift | Chance |
+|----------|------|--------|
+| Fishing | Caught fish, pufferfish, diamond, star | ~30% on good catch |
+| Magic | Flower, butterfly, rainbow | ~20% on successful spell |
+| Telescope | Names a star after you | ~20% per session |
+
+When a gift appears, Claudy pauses activities and announces it ("look what i found!", "this is for you! :3"). Click Claudy to collect. If you don't collect in time, Claudy keeps it ("ok, keeping it for myself :p").
+
+### Memory
+
+Claudy remembers things in `~/.claudy/memory.json`:
+
+- **Days together** — occasionally says "we've been together for 47 days" (special phrases for milestones: 10, 50, 100...)
+- **App launches** — "Spotify for the 3rd time today :)"
+- **Gifts** — keeps a history of all gifts given and collected
+- **Claude.ai easter eggs** — sometimes quotes claude.ai headlines ("golden hour thinking", "ready when you are, Kate")
 
 ## Schedule & Activities
 
@@ -112,7 +150,7 @@ Each activity is a **phased animation** — a sequence of sprites, particles, an
 Built with Python + PyObjC, pure AppKit — no game frameworks, no SpriteKit, no Metal.
 
 ```
-app.py               # Entry point, NSWindow, update loop, input handling
+app.py               # Entry point, NSWindow, update loop, input handling, gifts
 character.py          # State machine, phased animation engine
 sprite_renderer.py    # CGContext pixel rendering pipeline
 sprites/
@@ -120,11 +158,12 @@ sprites/
   activities.py       # 39 activity & reaction sprites
 animations.py         # Bounce, shake, gravity drop
 particles.py          # 14 particle types (sparkles, hearts, notes, zzz...)
-speech.py             # Floating speech bubbles
+speech.py             # Floating speech bubbles (with persistent mode for gifts)
 schedule.py           # Owl/lark time-of-day behavior weights
 system_events.py      # macOS event reactions (app launches, sleep/wake)
-settings.py           # Settings persistence + UI (terminal, schedule, language)
-phrases.py            # Bilingual phrase system (RU/EN)
+settings.py           # Settings persistence + localized UI
+phrases.py            # Bilingual phrase system (RU/EN) + relationship phrases
+memory.py             # Relationship memory (clicks, days, gifts, app launches)
 config.py             # Palette, constants
 ```
 
@@ -135,13 +174,19 @@ Right-click → Settings to configure:
 | Setting | Options | Default |
 |---------|---------|---------|
 | Claude Code terminal | Terminal, iTerm2, Warp | Terminal |
-| Schedule mode | Night Owl (sleep 4am–11am) / Early Bird (sleep 10pm–6am) | Night Owl |
+| Schedule mode | Night Owl / Early Bird | Night Owl |
 | Language | Русский / English | English |
-| Speech frequency | Often (10s) / Normal (1 min) / Rarely (10 min) / Very rarely (30 min) / Almost never (1 hr) | Normal |
+| Your name | Text field | — |
+| Speech frequency | Often (10s) / Normal (1 min) / Rarely / Very rarely / Almost never | Normal |
+| Gift duration | 10s / 1 min / 5 min / 15 min / 30 min / 1 hr | 5 min |
+| Gifts per day | 1 / 3 / 5 / 10 / Unlimited | 3 |
+| Developer mode | Checkbox | Off |
 
-Settings are saved to `~/.claudy/settings.json`.
+Settings UI is fully localized — labels and options appear in the selected language.
 
-Right-click → Activities to immediately trigger any activity (useful for previewing animations).
+Settings are saved to `~/.claudy/settings.json`. Relationship memory is saved to `~/.claudy/memory.json`.
+
+Developer mode enables an Activities submenu for previewing animations and testing gifts.
 
 ## Credits
 

@@ -2,7 +2,7 @@
 
 import AppKit
 import random
-from phrases import t
+from phrases import t, format_phrase, SLEEP_PHRASES, WAKE_PHRASES, APP_COUNT_PHRASES
 
 # Bundle IDs that should trigger the "working" activity
 CODING_APPS = {
@@ -146,6 +146,15 @@ class SystemEventHandler:
             AppKit.NSWorkspaceDidLaunchApplicationNotification, None)
 
     def handleSleep_(self, notification):
+        from memory import Memory
+        from settings import Settings
+        # Show sleep greeting if attached
+        if Memory.shared().is_attached():
+            name = Settings.shared().user_name
+            phrase = format_phrase(random.choice(SLEEP_PHRASES), name=name)
+            self.character.current_message = phrase
+            self.character.events.append(("message", phrase))
+
         self.character.state = "sleeping"
         self.character.phase_index = 0
         self.character.phase_timer = 0
@@ -155,7 +164,13 @@ class SystemEventHandler:
 
     def handleWake_(self, notification):
         self.character._enter_idle()
-        msg = t("*зевает*")
+        from memory import Memory
+        from settings import Settings
+        if Memory.shared().is_attached():
+            name = Settings.shared().user_name
+            msg = format_phrase(random.choice(WAKE_PHRASES), name=name)
+        else:
+            msg = t("*зевает*")
         self.character.current_message = msg
         self.character.events.append(("message", msg))
 
@@ -163,25 +178,38 @@ class SystemEventHandler:
         info = notification.userInfo()
         if not info:
             return
-        app = info.get("NSWorkspaceApplicationKey")
-        if not app:
+        app_obj = info.get("NSWorkspaceApplicationKey")
+        if not app_obj:
             return
-        bundle_id = app.bundleIdentifier()
+        bundle_id = app_obj.bundleIdentifier()
         if not bundle_id:
             return
 
-        phrases = APP_PHRASES.get(bundle_id)
-        if phrases:
-            phrase = t(random.choice(phrases))
-            if not self.character.state.startswith("reaction_"):
-                self.character.current_message = phrase
-                # Show speech bubble directly via app delegate
-                delegate = AppKit.NSApp.delegate()
-                if delegate and hasattr(delegate, 'speech'):
-                    delegate.speech.show(
-                        phrase, self.character.x,
-                        delegate.dock_y
-                    )
+        # Track app launches in memory
+        from memory import Memory
+        count = Memory.shared().record_app_launch(bundle_id)
+
+        # Pick phrase: counter phrase if 3+ launches, else normal
+        phrase = None
+        if count >= 3 and random.random() < 0.5:
+            app_name = str(app_obj.localizedName() or "")
+            if app_name:
+                phrase = format_phrase(
+                    random.choice(APP_COUNT_PHRASES),
+                    app=app_name, n=count)
+        if phrase is None:
+            app_phrases = APP_PHRASES.get(bundle_id)
+            if app_phrases:
+                phrase = t(random.choice(app_phrases))
+
+        if phrase and not self.character.state.startswith("reaction_"):
+            self.character.current_message = phrase
+            delegate = AppKit.NSApp.delegate()
+            if delegate and hasattr(delegate, 'speech'):
+                delegate.speech.show(
+                    phrase, self.character.x,
+                    delegate.dock_y
+                )
 
         # Mirror user activity
         if bundle_id in CODING_APPS:
