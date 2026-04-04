@@ -168,7 +168,7 @@ _EN = {
     "вместе веселее!": "more fun together!",
     "ты мой лучший друг!": "you're my best friend!",
     "расскажи что-нибудь!": "tell me something!",
-    "а помнишь?..": "remember when?...",
+    "а помнишь?...": "remember when?...",
     "пока-пока!": "bye-bye!",
     "было весело!": "that was fun!",
     "приходи ещё!": "come back soon!",
