@@ -493,7 +493,8 @@ class CrabApp:
             if limit > 0:
                 today_gifts = sum(
                     1 for g in Memory.shared()._data["gifts"]
-                    if g.get("date") == Memory.shared()._data["today"]["date"])
+                    if g.get("date") == Memory.shared()._data["today"]["date"]
+                    and g.get("type") != "star")
                 if today_gifts >= limit:
                     return
 
@@ -604,7 +605,7 @@ class CrabApp:
             elif event_type == "gift_star":
                 try:
                     name = event_data or ""
-                    Memory.shared().add_gift("star", "⭐", name=name)
+                    Memory.shared().add_gift("star", "⭐", name=name, collected=True)
                 except Exception:
                     pass
 

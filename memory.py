@@ -157,13 +157,13 @@ class Memory:
                 return gift
         return None
 
-    def add_gift(self, gift_type, emoji, name=None):
+    def add_gift(self, gift_type, emoji, name=None, collected=False):
         """Add a new gift. Returns the gift dict."""
         gift = {
             "type": str(gift_type),
             "emoji": str(emoji),
             "date": date.today().isoformat(),
-            "collected": False,
+            "collected": collected,
         }
         if name:
             gift["name"] = name
