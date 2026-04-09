@@ -176,6 +176,39 @@ _EN = {
     "до встречи!": "see you!",
     "хороший был день :3": "good day :3",
 
+    # Friend together-activities: walk
+    "погуляем!": "let's walk!",
+    "пойдём!": "let's go!",
+    "куда пойдём?": "where to?",
+    "прогулка!": "walk time!",
+    "вперёд!": "onwards!",
+    "хорошая прогулка!": "nice walk!",
+    "устал :3": "tired :3",
+    "вернулись!": "we're back!",
+    # Friend together-activities: play
+    "играем!": "let's play!",
+    "догоняй!": "catch me!",
+    "весело!": "so fun!",
+    "ещё! ещё!": "more! more!",
+    "прыг-прыг!": "boing-boing!",
+    # Friend together-activities: sit
+    "тихо тут...": "it's quiet...",
+    "красиво...": "beautiful...",
+    "просто посидим": "let's just sit",
+    "звёзды...": "stars...",
+    "*молчит вместе*": "*quiet together*",
+    # Friend together-activities: chat
+    "а ты знал?...": "did you know?...",
+    "слушай!": "listen!",
+    "расскажу историю!": "let me tell a story!",
+    "угадай что!": "guess what!",
+    "а помнишь тот раз?": "remember that time?",
+    "ха-ха! да!": "ha-ha! yeah!",
+    "правда?!": "really?!",
+    "это здорово!": "that's great!",
+    "расскажи ещё!": "tell me more!",
+    "ого!": "wow!",
+
     # Startup / system
     "*зевает*": "*yawns*",
 

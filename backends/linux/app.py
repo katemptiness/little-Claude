@@ -98,7 +98,8 @@ class CrabApp:
         all_sprites.update(ACTIVITY_SPRITES)
         self.sprite_cache = SpriteCache(all_sprites)
 
-        friend_names = ["idle", "blink", "happy", "love", "wave"]
+        friend_names = ["idle", "blink", "happy", "love", "wave",
+                        "walk_a", "walk_b", "play_a", "play_b"]
         for name in friend_names:
             if name in all_sprites:
                 self.sprite_cache.add_friend(name, all_sprites[name])

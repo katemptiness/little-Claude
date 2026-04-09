@@ -113,8 +113,9 @@ ACTIVITIES = {
               bounce=True),
         Phase(["magic_cast"], 150, 800, message="✨ ПРИЗЫВ!",
               shake=True, special="summon_friend"),
-        Phase(["happy"], 500, 3000, special="friend_chat"),
-        Phase(["idle"], 500, 4000, special="friend_play"),
+        # Phases 3+ are dynamically rebuilt by summon_friend special.
+        # Defaults below are fallbacks only.
+        Phase(["happy"], 500, 3000, special="friend_chat_varied"),
         Phase(["happy"], 500, 2500, special="friend_bye"),
         Phase(["idle"], 500, 2000, special="friend_gone"),
     ],
@@ -155,6 +156,59 @@ FRIEND_AFTER = [
     "было весело!", "приходи ещё!", "скучаю уже...",
     "до встречи!", "хороший был день :3",
 ]
+
+FRIEND_WALK_PHRASES = [
+    "погуляем!", "пойдём!", "куда пойдём?",
+    "прогулка!", "вперёд!",
+]
+
+FRIEND_WALK_END_PHRASES = [
+    "хорошая прогулка!", "устал :3", "вернулись!",
+]
+
+FRIEND_PLAY_PHRASES = [
+    "играем!", "догоняй!", "весело!",
+    "ещё! ещё!", "прыг-прыг!",
+]
+
+FRIEND_SIT_PHRASES = [
+    "тихо тут...", "красиво...", "просто посидим",
+    "звёзды...", "*молчит вместе*",
+]
+
+FRIEND_CHAT_PHRASES = [
+    "а ты знал?...", "слушай!", "расскажу историю!",
+    "угадай что!", "а помнишь тот раз?",
+]
+
+FRIEND_CHAT_REPLY_PHRASES = [
+    "ха-ха! да!", "правда?!", "это здорово!",
+    "расскажи ещё!", "ого!",
+]
+
+# Pool of together-activities for randomized summoning hangouts.
+# Each entry is a callable returning fresh Phase lists.
+FRIEND_ACTIVITY_POOL = {
+    "walk": lambda: [
+        Phase(["walk_a", "walk_b"], 200, 6000, duration_max_ms=10000,
+              special="friend_walk_start"),
+        Phase(["idle"], 500, 2000, special="friend_walk_stop"),
+    ],
+    "play": lambda: [
+        Phase(["play_a", "play_b"], 200, 4000, bounce=True,
+              special="friend_play_bounce",
+              particle="note", particle_interval_ms=600),
+    ],
+    "sit": lambda: [
+        Phase(["idle"], 500, 5000, duration_max_ms=8000,
+              special="friend_sit",
+              particle="star", particle_interval_ms=2500),
+    ],
+    "chat": lambda: [
+        Phase(["happy"], 500, 3000, special="friend_chat_varied"),
+        Phase(["idle"], 500, 2000, special="friend_chat_reply"),
+    ],
+}
 
 IDLE_PHRASES = [
     "скучно...", "хм...", ":3", "думаю о рыбке...",
@@ -229,6 +283,10 @@ class Character:
         # Friend summoning
         self.friend_visible = False
         self.friend_sprite = "idle"
+        self.friend_walking = False
+        self.friend_walk_timer = 0.0
+        self.friend_walk_frame = 0
+        self.friend_playing = False
 
         # Events emitted this tick
         self.events = []
@@ -353,6 +411,32 @@ class Character:
                 self.particle_timer = 0
                 self.events.append(("particle", phase.particle))
 
+        # Friend walk animation and movement
+        if self.friend_walking:
+            self.friend_walk_timer += dt
+            if self.friend_walk_timer >= 200:
+                self.friend_walk_timer = 0
+                self.friend_walk_frame = 1 - self.friend_walk_frame
+                self.friend_sprite = ["walk_a", "walk_b"][self.friend_walk_frame]
+            if hasattr(self, '_friend_walk_target'):
+                dx = self._friend_walk_target - self.x
+                if abs(dx) > 2:
+                    direction = 1 if dx > 0 else -1
+                    self.facing_right = direction > 0
+                    step = min(abs(dx), self.walk_speed * dt)
+                    self.x += direction * step
+                else:
+                    # Arrived — skip to next phase so walk sprites stop
+                    self.phase_timer = self.current_phase_duration
+
+        # Friend play animation (cycle play_a/play_b)
+        if self.friend_playing:
+            self.friend_walk_timer += dt
+            if self.friend_walk_timer >= 200:
+                self.friend_walk_timer = 0
+                self.friend_walk_frame = 1 - self.friend_walk_frame
+                self.friend_sprite = ["play_a", "play_b"][self.friend_walk_frame]
+
         # Check if phase is done
         self.phase_timer += dt
         if self.phase_timer >= self.current_phase_duration:
@@ -380,6 +464,9 @@ class Character:
         self.phase_timer = 0
         self.frame_timer = 0
         self.frame_index = 0
+        # Clear friend animation flags — specials will re-set if needed
+        self.friend_walking = False
+        self.friend_playing = False
         self.particle_timer = 0
         if phase.duration_max_ms:
             self.current_phase_duration = random.uniform(
@@ -465,23 +552,81 @@ class Character:
             for _ in range(6):
                 self.events.append(("particle", "poof"))
             self.events.append(("friend_appear", None))
-
-        elif phase.special == "friend_chat":
-            self.friend_sprite = "happy"
+            # Greeting
             msg = t(random.choice(FRIEND_PHRASES))
             self.current_message = msg
             self.events.append(("message", msg))
+            # Rebuild activity with random together-activities
+            pool_keys = list(FRIEND_ACTIVITY_POOL.keys())
+            chosen = random.sample(pool_keys, k=random.randint(2, 3))
+            intro = ACTIVITIES["summoning"][:3]
+            middle = []
+            for key in chosen:
+                middle.extend(FRIEND_ACTIVITY_POOL[key]())
+            outro = [
+                Phase(["happy"], 500, 2500, special="friend_bye"),
+                Phase(["idle"], 500, 2000, special="friend_gone"),
+            ]
+            ACTIVITIES["summoning"] = intro + middle + outro
 
-        elif phase.special == "friend_play":
-            self.friend_sprite = "idle"
-            msg = t(random.choice(FRIEND_TOGETHER))
+        elif phase.special == "friend_walk_start":
+            self.friend_walking = True
+            self.friend_walk_timer = 0.0
+            self.friend_walk_frame = 0
+            self.friend_sprite = "walk_a"
+            margin = WINDOW_WIDTH
+            walk_dist = random.uniform(80, 200)
+            direction = 1 if random.random() > 0.5 else -1
+            self.facing_right = direction > 0
+            self._friend_walk_target = self.x + direction * walk_dist
+            self._friend_walk_target = max(margin, min(
+                self.screen_width - margin, self._friend_walk_target))
+            msg = t(random.choice(FRIEND_WALK_PHRASES))
+            self.current_message = msg
+            self.events.append(("message", msg))
+
+        elif phase.special == "friend_walk_stop":
+            self.friend_walking = False
+            self.friend_sprite = "happy"
+            msg = t(random.choice(FRIEND_WALK_END_PHRASES))
+            self.current_message = msg
+            self.events.append(("message", msg))
+
+        elif phase.special == "friend_play_bounce":
+            self.friend_playing = True
+            self.friend_walk_timer = 0.0
+            self.friend_walk_frame = 0
+            self.friend_sprite = "play_a"
+            msg = t(random.choice(FRIEND_PLAY_PHRASES))
             self.current_message = msg
             self.events.append(("message", msg))
             for _ in range(3):
+                self.events.append(("particle", "sparkle"))
+
+        elif phase.special == "friend_sit":
+            self.friend_sprite = "idle"
+            msg = t(random.choice(FRIEND_SIT_PHRASES))
+            self.current_message = msg
+            self.events.append(("message", msg))
+
+        elif phase.special == "friend_chat_varied":
+            self.friend_sprite = "happy"
+            msg = t(random.choice(FRIEND_CHAT_PHRASES))
+            self.current_message = msg
+            self.events.append(("message", msg))
+
+        elif phase.special == "friend_chat_reply":
+            self.friend_sprite = "love"
+            msg = t(random.choice(FRIEND_CHAT_REPLY_PHRASES))
+            self.current_message = msg
+            self.events.append(("message", msg))
+            for _ in range(2):
                 self.events.append(("particle", "heart"))
 
         elif phase.special == "friend_bye":
             self.friend_sprite = "wave"
+            self.friend_walking = False
+            self.friend_playing = False
             msg = t("пока-пока!")
             self.current_message = msg
             self.events.append(("message", msg))
@@ -489,6 +634,7 @@ class Character:
         elif phase.special == "friend_gone":
             self.friend_visible = False
             self.friend_sprite = "idle"
+            self.friend_walking = False
             for _ in range(6):
                 self.events.append(("particle", "poof"))
             self.events.append(("friend_leave", None))
@@ -539,6 +685,8 @@ class Character:
         if not from_sleeping:
             self.current_message = None
         self.is_playing_jump = False
+        self.friend_walking = False
+        self.friend_playing = False
 
     def _start_walking(self):
         self.state = "walking"

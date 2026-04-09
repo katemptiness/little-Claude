@@ -248,7 +248,8 @@ class AppDelegate(AppKit.NSObject):
         self.sprite_cache = SpriteCache(all_sprites)
 
         # Pre-render friend sprites (blue palette)
-        friend_sprite_names = ["idle", "blink", "happy", "love", "wave"]
+        friend_sprite_names = ["idle", "blink", "happy", "love", "wave",
+                                "walk_a", "walk_b", "play_a", "play_b"]
         for name in friend_sprite_names:
             if name in all_sprites:
                 self.sprite_cache.add_friend(name, all_sprites[name])
