@@ -28,6 +28,7 @@ from backends.linux.events import SystemEventHandler
 from backends.linux.speech import SpeechBubble
 from settings import Settings, GIFT_DURATIONS
 from backends.linux.settings_ui import SettingsWindow
+from backends.linux.gifts_ui import GiftsWindow
 from phrases import (t, get_language, format_phrase, GIFT_COLLECT_PHRASES,
                      GIFT_ANNOUNCE_PHRASES, GIFT_EXPIRED_PHRASES)
 from memory import Memory
@@ -89,6 +90,7 @@ class CrabApp:
     def __init__(self):
         self._settings = Settings.shared()
         self._settings_window = SettingsWindow()
+        self._gifts_window = GiftsWindow()
 
         # Build sprite cache
         all_sprites = {}
@@ -417,6 +419,7 @@ class CrabApp:
             menu.append(act_item)
             menu.append(Gtk.SeparatorMenuItem())
 
+        menu.append(_item("Gifts", "Подарки", self._open_gifts))
         menu.append(_item("Settings", "Настройки", self._open_settings))
         menu.append(_item("About Claudy", "О Claudy", self._show_about))
         menu.append(Gtk.SeparatorMenuItem())
@@ -455,6 +458,9 @@ class CrabApp:
         self._show_gift(
             {"type": "test", "emoji": random.choice(emojis)},
             self.character.x)
+
+    def _open_gifts(self, item):
+        self._gifts_window.show()
 
     def _open_settings(self, item):
         self._settings_window.show()

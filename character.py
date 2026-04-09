@@ -437,8 +437,8 @@ class Character:
                     ["fish_happy"], 500, 2500, special="fish_reveal")
 
         elif phase.special == "star_gaze":
-            # ~20% chance to name a star after the user
-            if random.random() < 0.2:
+            # ~10% chance to name a star after the user
+            if random.random() < 0.1:
                 from settings import Settings
                 from phrases import STAR_NAMING_PHRASES, STAR_NAMING_PHRASES_NAMELESS
                 name = Settings.shared().user_name

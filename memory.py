@@ -159,11 +159,13 @@ class Memory:
 
     def add_gift(self, gift_type, emoji, name=None, collected=False):
         """Add a new gift. Returns the gift dict."""
+        from gift_stories import random_story_id
         gift = {
             "type": str(gift_type),
             "emoji": str(emoji),
             "date": date.today().isoformat(),
             "collected": collected,
+            "story_id": random_story_id(gift_type),
         }
         if name:
             gift["name"] = name
@@ -179,3 +181,19 @@ class Memory:
                 self.save()
                 return gift
         return None
+
+    def get_collected_gifts(self):
+        """Return all collected gifts, newest first. Backfills missing story_id."""
+        from gift_stories import random_story_id
+        changed = False
+        result = []
+        for gift in self._data["gifts"]:
+            if gift.get("collected", False):
+                if "story_id" not in gift:
+                    gift["story_id"] = random_story_id(gift.get("type", "fish"))
+                    changed = True
+                result.append(gift)
+        if changed:
+            self.save()
+        result.reverse()
+        return result

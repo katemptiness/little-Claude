@@ -23,6 +23,7 @@ from backends.macos.events import SystemEventHandler
 from backends.macos.speech import SpeechBubble
 from settings import Settings, GIFT_DURATIONS
 from backends.macos.settings_ui import SettingsWindow
+from backends.macos.gifts_ui import GiftsWindow
 from phrases import (t, format_phrase, GIFT_COLLECT_PHRASES,
                      GIFT_ANNOUNCE_PHRASES, GIFT_EXPIRED_PHRASES)
 from memory import Memory
@@ -208,6 +209,7 @@ class CrabView(AppKit.NSView):
             menu.addItem_(activities_item)
             menu.addItem_(AppKit.NSMenuItem.separatorItem())
 
+        menu.addItem_(_item("Gifts", "Подарки", "openGifts:"))
         menu.addItem_(_item("Settings", "Настройки", "openSettings:"))
         menu.addItem_(_item("About Claudy", "О Claudy", "showAbout:"))
         menu.addItem_(AppKit.NSMenuItem.separatorItem())
@@ -237,6 +239,7 @@ class AppDelegate(AppKit.NSObject):
         # Initialize settings
         self._settings = Settings.shared()
         self._settings_window = SettingsWindow.alloc().init()
+        self._gifts_window = GiftsWindow.alloc().init()
 
         # Merge all sprites and build cache
         all_sprites = {}
@@ -441,6 +444,10 @@ class AppDelegate(AppKit.NSObject):
         self._show_gift(
             {"type": "test", "emoji": _r.choice(emojis)},
             self.character.x)
+
+    def openGifts_(self, sender):
+        """Open the gifts collection window."""
+        self._gifts_window.show()
 
     def openSettings_(self, sender):
         """Open the settings window."""

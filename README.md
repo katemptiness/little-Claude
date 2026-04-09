@@ -73,7 +73,7 @@ Requires Python 3.10+, GTK3, and a bottom panel/dock. Tested on Ubuntu 24.04 LTS
 | Click (with gift) | Collects the gift — Claudy reacts happily |
 | Double-click | Opens Claude.app (macOS) / claude.ai (Linux) |
 | Drag & drop | Surprised face, falls back to Dock with gravity (macOS only) |
-| Right-click | Context menu (Open Claude, Open Claude Code, Settings, About Claudy, Quit) |
+| Right-click | Context menu (Open Claude, Open Claude Code, Gifts, Settings, About Claudy, Quit) |
 
 ## Relationships
 
@@ -97,9 +97,13 @@ During some activities, Claudy may find something and leave it on the Dock for y
 |----------|------|--------|
 | Fishing | Caught fish, pufferfish, diamond, star | ~30% on good catch |
 | Magic | Flower, butterfly, rainbow | ~20% on successful spell |
-| Telescope | Names a star after you | ~20% per session |
+| Telescope | Names a star after you | ~10% per session |
 
 When a gift appears, Claudy pauses activities and announces it ("look what i found!", "this is for you! :3"). Click Claudy to collect. If you don't collect in time, Claudy keeps it ("ok, keeping it for myself :p").
+
+#### Gift Collection
+
+Right-click → **Gifts** to view your collection. Each gift comes with a unique backstory — a cute little tale from Claudy about how the gift was found, caught, or conjured. 120 bilingual stories in total (40 per gift type), randomly assigned at collection time.
 
 ### Memory
 
@@ -173,6 +177,7 @@ schedule.py                   # Owl/lark time-of-day behavior weights
 settings.py                   # Settings persistence (JSON)
 phrases.py                    # Bilingual phrase system (RU/EN) + relationship phrases
 memory.py                     # Relationship memory (clicks, days, gifts, app launches)
+gift_stories.py               # 120 bilingual gift backstories (40 per type)
 config.py                     # Palette, constants
 
 # macOS backend (PyObjC / AppKit / Quartz)
@@ -182,6 +187,7 @@ backends/macos/
   speech.py                   # NSWindow speech bubbles
   events.py                   # NSWorkspace notifications (app launches, sleep/wake)
   settings_ui.py              # AppKit settings window
+  gifts_ui.py                 # Gift collection window
 
 # Linux backend (GTK3 / PyGObject / Cairo)
 backends/linux/
@@ -190,6 +196,7 @@ backends/linux/
   speech.py                   # GTK3 speech bubbles
   events.py                   # D-Bus logind + process-based app detection
   settings_ui.py              # GTK3 settings dialog
+  gifts_ui.py                 # Gift collection window
 ```
 
 ## Settings
