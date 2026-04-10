@@ -82,11 +82,12 @@ Claudy doesn't demand attention — but it notices when you're there.
 
 ### Attachment
 
-There's an invisible threshold: **5 clicks per day** (resets each session). Before the threshold, clicks produce sparkles. After it, you unlock:
+There's an invisible threshold: **5 clicks per day** (resets each session). Giving Claudy a gift counts as 2 clicks. Before the threshold, clicks produce sparkles. After it, you unlock:
 
 - **Hearts** instead of sparkles on click
 - **Personal phrases** that use your name ("how's it going, Kate?", "i like spending time with Kate :3")
 - **Sleep/wake greetings** ("falling asleep, Kate... 💤", "that was a nice nap :3")
+- **Gifts from Claudy** — only after attachment will Claudy start leaving gifts on the Dock for you
 
 If you don't click — nothing changes. Claudy is perfectly happy on its own.
 
