@@ -742,6 +742,253 @@ STAR_STORIES = [
     },
 ]
 
+SHELL_STORIES = [
+    # --- 1-10 ---
+    {
+        "ru": "нашёл эту ракушку на самом краю берега. "
+              "она как будто ждала, что кто-то её заберёт :3",
+        "en": "found this shell at the very edge of the shore. "
+              "it was like it was waiting for someone to pick it up :3",
+    },
+    {
+        "ru": "приложи к уху — слышишь море? "
+              "я тоже каждый раз слышу, хотя живу рядом.",
+        "en": "hold it to your ear — can you hear the sea? "
+              "i hear it every time too, even though i live right here.",
+    },
+    {
+        "ru": "эта ракушка идеально спиральная! считал завитки — "
+              "их семь. моё любимое число.",
+        "en": "this shell is perfectly spiral! i counted the swirls — "
+              "there are seven. my favorite number.",
+    },
+    {
+        "ru": "искал ракушку для {name} очень долго. "
+              "но когда нашёл эту — сразу понял: она!",
+        "en": "was looking for a shell for {name} for a long time. "
+              "but when i found this one — i just knew: this is it!",
+    },
+    {
+        "ru": "эта маленькая, но зато блестит на солнце, "
+              "как будто с жемчужинкой внутри.",
+        "en": "this one's small, but it sparkles in the sun, "
+              "like there's a tiny pearl inside.",
+    },
+    {
+        "ru": "знаешь, ракушки — это домики тех, кто уже уехал. "
+              "пустой домик — значит, можно забрать на память!",
+        "en": "you know, shells are little houses of those who moved out. "
+              "an empty house means you can keep it as a souvenir!",
+    },
+    {
+        "ru": "шёл по берегу, смотрел под ноги... и вдруг — "
+              "самая красивая ракушка, которую я видел! для {name}.",
+        "en": "was walking along the shore, looking down... and suddenly — "
+              "the most beautiful shell i've ever seen! for {name}.",
+    },
+    {
+        "ru": "эта ракушка розовая внутри! "
+              "цвет заката, застывший навсегда.",
+        "en": "this shell is pink on the inside! "
+              "the color of a sunset, frozen forever.",
+    },
+    {
+        "ru": "подобрал, помыл в волне, и она засияла. "
+              "иногда красоту надо просто отмыть от песка.",
+        "en": "picked it up, rinsed it in a wave, and it started glowing. "
+              "sometimes beauty just needs to be washed off the sand.",
+    },
+    {
+        "ru": "другие крабы говорят: зачем тебе ракушки, у тебя свой панцирь! "
+              "а я говорю: это не для меня, это для {name} :3",
+        "en": "other crabs say: why do you need shells, you have your own shell! "
+              "and i say: it's not for me, it's for {name} :3",
+    },
+    # --- 11-20 ---
+    {
+        "ru": "тут раньше жил маленький рак-отшельник. "
+              "он оставил записку: «передай кому-нибудь хорошему». вот!",
+        "en": "a little hermit crab used to live here. "
+              "he left a note: 'pass it to someone nice.' here you go!",
+    },
+    {
+        "ru": "эту ракушку принесло волной прямо к моим клешням. "
+              "кажется, океан тоже хочет сделать подарок {name}!",
+        "en": "the wave brought this shell right to my claws. "
+              "i think the ocean also wants to give a gift to {name}!",
+    },
+    {
+        "ru": "у этой ракушки полосочки — белые и коричневые. "
+              "как маленький полосатый домик!",
+        "en": "this shell has stripes — white and brown. "
+              "like a tiny striped house!",
+    },
+    {
+        "ru": "нашёл две одинаковые ракушки! одну оставил себе, "
+              "другую — {name}. теперь у нас парные :3",
+        "en": "found two identical shells! kept one for myself, "
+              "the other — for {name}. now we have a matching pair :3",
+    },
+    {
+        "ru": "сидел на камне, и ракушка просто лежала рядом. "
+              "иногда лучшие находки — те, что не ищешь.",
+        "en": "was sitting on a rock, and a shell was just lying there. "
+              "sometimes the best finds are the ones you're not looking for.",
+    },
+    {
+        "ru": "эта ракушка пахнет морем и солнцем. "
+              "самый лучший запах на свете.",
+        "en": "this shell smells like the sea and sun. "
+              "the best smell in the world.",
+    },
+    {
+        "ru": "гладкая, тёплая от солнца, идеально ложится в клешню. "
+              "а в ладошку {name} — наверняка ещё лучше!",
+        "en": "smooth, warm from the sun, fits perfectly in my claw. "
+              "and in {name}'s hand — probably even better!",
+    },
+    {
+        "ru": "собирал ракушки целый час! но только эта "
+              "достойна стать подарком.",
+        "en": "was collecting shells for a whole hour! but only this one "
+              "is worthy of being a gift.",
+    },
+    {
+        "ru": "когда я был совсем маленьким крабиком, "
+              "мне тоже подарили ракушку. теперь моя очередь!",
+        "en": "when i was a tiny little crab, "
+              "someone gave me a shell too. now it's my turn!",
+    },
+    {
+        "ru": "на этой ракушке есть узор, похожий на звёздочку. "
+              "морская звезда, наверное, оставила автограф!",
+        "en": "this shell has a pattern that looks like a star. "
+              "a starfish probably left an autograph!",
+    },
+    # --- 21-30 ---
+    {
+        "ru": "говорят, каждая ракушка помнит все волны, "
+              "которые её качали. целая жизнь в одной раковине.",
+        "en": "they say every shell remembers all the waves "
+              "that rocked it. a whole life in one shell.",
+    },
+    {
+        "ru": "прятал эту ракушку от чаек! они тоже хотели, "
+              "но я сказал — нет, это для {name}.",
+        "en": "was hiding this shell from seagulls! they wanted it too, "
+              "but i said — no, this is for {name}.",
+    },
+    {
+        "ru": "нашёл на дне маленькой лужицы между камнями. "
+              "целая вселенная в одной ракушке!",
+        "en": "found it at the bottom of a tiny pool between rocks. "
+              "a whole universe in one shell!",
+    },
+    {
+        "ru": "эта ракушка переливается перламутром. "
+              "как маленькая радуга, которую можно держать в руке!",
+        "en": "this shell shimmers with mother-of-pearl. "
+              "like a little rainbow you can hold in your hand!",
+    },
+    {
+        "ru": "волна унесла мою первую находку... "
+              "но вторая оказалась ещё красивее. так бывает!",
+        "en": "the wave swept away my first find... "
+              "but the second one turned out even prettier. that happens!",
+    },
+    {
+        "ru": "закопал ракушку в песок, а потом откопал. "
+              "теперь это «найденное сокровище» — так ценнее!",
+        "en": "buried the shell in the sand, then dug it up. "
+              "now it's a 'found treasure' — that makes it more valuable!",
+    },
+    {
+        "ru": "кажется, внутри этой ракушки кто-то нарисовал спираль. "
+              "природа — лучший художник!",
+        "en": "it looks like someone painted a spiral inside this shell. "
+              "nature is the best artist!",
+    },
+    {
+        "ru": "маленькая ракушка, но если приглядеться — "
+              "видны крошечные детали. мир в миниатюре!",
+        "en": "a small shell, but if you look closely — "
+              "you can see tiny details. a world in miniature!",
+    },
+    {
+        "ru": "нёс эту ракушку в клешне очень осторожно. "
+              "хрупкая, как доверие. и такая же ценная.",
+        "en": "carried this shell in my claw very carefully. "
+              "fragile, like trust. and just as precious.",
+    },
+    {
+        "ru": "эта ракушка звенит, если постучать! "
+              "маленький морской колокольчик для {name} :3",
+        "en": "this shell rings if you tap it! "
+              "a little sea bell for {name} :3",
+    },
+    # --- 31-40 ---
+    {
+        "ru": "ой, а эта с дырочкой — можно повесить на верёвочку "
+              "и носить как кулон! модно же?",
+        "en": "oh, this one has a hole — you could hang it on a string "
+              "and wear it as a pendant! that's fashionable, right?",
+    },
+    {
+        "ru": "в каждой ракушке живёт эхо. "
+              "в этой — эхо счастливого дня.",
+        "en": "every shell holds an echo. "
+              "this one holds the echo of a happy day.",
+    },
+    {
+        "ru": "шёл за одной ракушкой, нашёл другую, "
+              "а потом ещё одну... но эта — самая-самая!",
+        "en": "went after one shell, found another, "
+              "then one more... but this one is the very best!",
+    },
+    {
+        "ru": "рассматривал её на закате — она стала золотой! "
+              "на рассвете, наверное, будет серебряной.",
+        "en": "was admiring it at sunset — it turned golden! "
+              "at sunrise it'll probably be silver.",
+    },
+    {
+        "ru": "если собрать много ракушек, можно выложить мозаику. "
+              "но пока — одну самую лучшую для {name}.",
+        "en": "if you collect many shells, you can make a mosaic. "
+              "but for now — the very best one for {name}.",
+    },
+    {
+        "ru": "эту ракушку я нашёл там, где волны "
+              "рисуют узоры на песке. волшебное место!",
+        "en": "found this shell where the waves "
+              "draw patterns in the sand. a magical place!",
+    },
+    {
+        "ru": "ракушка выглядит обычной... но переверни — "
+              "а там целая картина из перламутра!",
+        "en": "the shell looks ordinary... but flip it over — "
+              "and there's a whole painting in mother-of-pearl!",
+    },
+    {
+        "ru": "она чуть-чуть щербатая сбоку. "
+              "не идеальная — зато настоящая. как я!",
+        "en": "it's a tiny bit chipped on the side. "
+              "not perfect — but real. like me!",
+    },
+    {
+        "ru": "положил ракушку на ладонь и загадал желание. "
+              "не скажу какое — а то не сбудется!",
+        "en": "put the shell on my palm and made a wish. "
+              "won't tell you what — or it won't come true!",
+    },
+    {
+        "ru": "коллекция ракушек {name} становится всё больше! "
+              "скоро понадобится отдельная полка :3",
+        "en": "{name}'s shell collection is growing! "
+              "soon you'll need a separate shelf :3",
+    },
+]
+
 
 def _get_stories(gift_type):
     """Return the story list for a gift type."""
@@ -751,6 +998,8 @@ def _get_stories(gift_type):
         return MAGIC_STORIES
     elif gift_type == "star":
         return STAR_STORIES
+    elif gift_type == "shell":
+        return SHELL_STORIES
     return FISH_STORIES  # fallback (test gifts, etc.)
 
 

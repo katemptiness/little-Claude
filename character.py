@@ -148,7 +148,8 @@ ACTIVITIES = {
               particle="exclaim", bounce=True),
         Phase(["shell_pick"], 500, 1500, message="подбирает..."),
         Phase(["shell_admire"], 500, 3000, message="какая красивая ракушка!",
-              particle="sparkle", particle_interval_ms=600),
+              particle="sparkle", particle_interval_ms=600,
+              special="shell_gift_chance"),
         Phase(["idle"], 500, 1000),
     ],
     "candle": [
@@ -618,6 +619,12 @@ class Character:
             msg = t(random.choice(SHELL_SEARCH_PHRASES))
             self.current_message = msg
             self.events.append(("message", msg))
+
+        elif phase.special == "shell_gift_chance":
+            # ~10% chance to gift the shell to the user
+            if random.random() < 0.1:
+                self.events.append(("gift", {
+                    "type": "shell", "emoji": "🐚"}))
 
         elif phase.special == "play_jump":
             self.is_playing_jump = True

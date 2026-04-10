@@ -130,6 +130,7 @@ def _gift_type_name(gift_type, ru):
         "fish":  ("Улов", "Catch"),
         "magic": ("Магия", "Magic"),
         "star":  ("Звезда", "Star"),
+        "shell": ("Ракушка", "Shell"),
         "test":  ("Тест", "Test"),
     }
     pair = names.get(gift_type, ("Подарок", "Gift"))
