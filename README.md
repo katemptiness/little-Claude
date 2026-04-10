@@ -108,15 +108,15 @@ When a gift appears, Claudy pauses activities and announces it ("look what i fou
 
 Right-click → **Give a gift** to present something to Claudy. Five gift types available:
 
-| Gift | Effect |
-|------|--------|
-| 🌸 Flower | Claudy reacts happily with sparkles and hearts |
-| 📖 Book | "i'll read it before bed!" |
-| 🎵 Song | Music notes float around Claudy |
-| 🍡 Marshmallow | Claudy saves it — next campfire, roasts *your* marshmallow with special phrases |
-| 🧸 Toy | Claudy sleeps with it — a teddy bear emoji appears next to sleeping Claudy |
+| Gift | Effect | Duration |
+|------|--------|----------|
+| 🌸 Flower | Claudy reacts happily with sparkles and hearts | Instant |
+| 📖 Book | Claudy mentions the book during idle moments ("one more chapter...", "*turning pages*") | Until next day |
+| 🎵 Song | Music notes float around Claudy | Instant |
+| 🍡 Marshmallow | Claudy saves it — next campfire, roasts *your* marshmallow with special phrases | Until next campfire (consumed) |
+| 🧸 Toy | Claudy sleeps with it — a teddy bear emoji appears next to sleeping Claudy | Until app relaunch |
 
-Each gift counts as 2 clicks toward attachment. Cooldown between gifts is configurable in Settings (default: 10 min). Marshmallow and toy effects persist for the session.
+Each gift counts as 2 clicks toward attachment. Cooldown between gifts is configurable in Settings (default: 10 min). Book and toy can only be given once (the menu item is grayed out until the effect resets).
 
 #### Gift Collection
 

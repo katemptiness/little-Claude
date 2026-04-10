@@ -2,6 +2,7 @@
 
 import random
 import time as _time
+from datetime import date
 from config import WINDOW_WIDTH, SPRITE_SIZE
 from schedule import get_weights
 from phrases import t, format_phrase
@@ -341,6 +342,8 @@ class Character:
         # User gifts to Claudy (session-only)
         self.has_marshmallow = False
         self.has_toy = False
+        self.has_book = False
+        self._book_date = None  # date when book was given (resets next day)
         self.last_gift_received_time = 0
 
         # Friend summoning
@@ -418,6 +421,15 @@ class Character:
             if name:
                 return phrase.replace("{name}", name)
             return phrase.replace("{name} ", "").replace(", {name}", "").replace("{name}", "")
+
+        # ~25% chance: book phrase if Claudy has a book (reset if new day)
+        if self.has_book:
+            if self._book_date != date.today().isoformat():
+                self.has_book = False
+                self._book_date = None
+            elif random.random() < 0.25:
+                from phrases import BOOK_IDLE_PHRASES
+                return t(random.choice(BOOK_IDLE_PHRASES))
 
         # Normal idle phrase
         return t(random.choice(IDLE_PHRASES))
@@ -841,6 +853,7 @@ class Character:
                 activity[4] = Phase(
                     ["campfire_done"], 500, 3000, message=done_msg,
                     particle="heart", particle_interval_ms=800, bounce=True)
+                self.has_marshmallow = False  # eaten!
             else:
                 # Restore defaults (avoid stale mutation)
                 activity[3] = Phase(
@@ -993,9 +1006,19 @@ class Character:
         cooldown = GIFT_COOLDOWNS.get(Settings.shared().gift_cooldown, 600)
         return (_time.time() - self.last_gift_received_time) >= cooldown
 
+    def can_accept_gift(self, gift_type):
+        """Check if a specific gift type can be accepted right now."""
+        if not self.can_receive_gift():
+            return False
+        if gift_type == "toy" and self.has_toy:
+            return False
+        if gift_type == "book" and self.has_book:
+            return False
+        return True
+
     def receive_gift(self, gift_type):
         """Handle user giving a gift to Claudy. Returns True if accepted."""
-        if not self.can_receive_gift():
+        if not self.can_accept_gift(gift_type):
             return False
 
         self.last_gift_received_time = _time.time()
@@ -1005,6 +1028,9 @@ class Character:
             self.has_marshmallow = True
         elif gift_type == "toy":
             self.has_toy = True
+        elif gift_type == "book":
+            self.has_book = True
+            self._book_date = date.today().isoformat()
 
         # Count as 2 clicks toward attachment
         from memory import Memory

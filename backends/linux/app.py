@@ -425,15 +425,16 @@ class CrabApp:
             ("marshmallow", "Зефирку 🍡", "Marshmallow 🍡"),
             ("toy", "Игрушку 🧸", "Toy 🧸"),
         ]
-        can_give = self.character.can_receive_gift()
         for gtype, label_ru, label_en in gift_types:
             label = label_ru if ru else label_en
+            if not self.character.can_accept_gift(gtype):
+                label += " ✓" if (gtype == "toy" or gtype == "book") else ""
             sub = Gtk.MenuItem(label=label)
             sub.connect("activate", self._give_gift, gtype)
-            if not can_give:
+            if not self.character.can_accept_gift(gtype):
                 sub.set_sensitive(False)
             give_menu.append(sub)
-        if not can_give:
+        if not self.character.can_receive_gift():
             give_menu.append(Gtk.SeparatorMenuItem())
             cd_label = "Подожди немножко..." if ru else "Wait a bit..."
             cd_item = Gtk.MenuItem(label=cd_label)

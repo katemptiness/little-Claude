@@ -323,6 +323,13 @@ _EN = {
     "какой мягкий! :3": "so soft! :3",
     "игрушка! положу рядом с подушкой!": "a toy! i'll put it next to my pillow!",
     "теперь не страшно засыпать!": "not scary to fall asleep now!",
+    # Book idle phrases
+    "интересная книжка...": "interesting book...",
+    "надо дочитать книжку!": "gotta finish the book!",
+    "а что там дальше в книге?": "what happens next in the book?",
+    "хорошая книга :3": "good book :3",
+    "*листает страницы*": "*turning pages*",
+    "ещё одну главу...": "one more chapter...",
 
     # Campfire marshmallow override (user gave marshmallow)
     "а эта зефирка от {name} <3": "this marshmallow is from {name} <3",
@@ -443,6 +450,15 @@ GIFT_TOY_PHRASES = [
     "какой мягкий! :3",
     "игрушка! положу рядом с подушкой!",
     "теперь не страшно засыпать!",
+]
+
+BOOK_IDLE_PHRASES = [
+    "интересная книжка...",
+    "надо дочитать книжку!",
+    "а что там дальше в книге?",
+    "хорошая книга :3",
+    "*листает страницы*",
+    "ещё одну главу...",
 ]
 
 GIFT_RECEIVE_PHRASES = {

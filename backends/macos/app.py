@@ -197,17 +197,18 @@ class CrabView(AppKit.NSView):
             ("marshmallow", "Зефирку 🍡", "Marshmallow 🍡"),
             ("toy", "Игрушку 🧸", "Toy 🧸"),
         ]
-        can_give = delegate.character.can_receive_gift()
         for gtype, label_ru, label_en in gift_types:
             label = label_ru if ru else label_en
+            if not delegate.character.can_accept_gift(gtype):
+                label += " ✓" if (gtype == "toy" or gtype == "book") else ""
             item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
                 label, "giveGift:", "")
             item.setTarget_(delegate)
             item.setRepresentedObject_(gtype)
-            if not can_give:
+            if not delegate.character.can_accept_gift(gtype):
                 item.setEnabled_(False)
             give_menu.addItem_(item)
-        if not can_give:
+        if not delegate.character.can_receive_gift():
             give_menu.addItem_(AppKit.NSMenuItem.separatorItem())
             cd_label = "Подожди немножко..." if ru else "Wait a bit..."
             cd_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
