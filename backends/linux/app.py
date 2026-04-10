@@ -123,6 +123,7 @@ class CrabApp:
         self.gift_timer = None
         self.friend_visible = False
         self.friend_sprite = "idle"
+        self.show_toy = False
 
         # Track sprite state for change detection
         self.current_sprite_name = "sleep_a"
@@ -303,6 +304,17 @@ class CrabApp:
             cr.move_to(gift_x, gift_y)
             PangoCairo.show_layout(cr, layout)
 
+        # Toy emoji (snuggled next to sleeping Claudy)
+        if self.show_toy:
+            cr.set_source_rgba(0, 0, 0, 1)
+            layout = widget.create_pango_layout("🧸")
+            font_desc = Pango.FontDescription("Sans 14")
+            layout.set_font_description(font_desc)
+            toy_x = SPRITE_OFFSET_X + SPRITE_SIZE - 10
+            toy_y = WINDOW_HEIGHT - 25
+            cr.move_to(toy_x, toy_y)
+            PangoCairo.show_layout(cr, layout)
+
     def _on_draw_particles(self, widget, cr):
         """Draw floating particles."""
         cr.set_operator(cairo.OPERATOR_SOURCE)
@@ -402,6 +414,35 @@ class CrabApp:
         menu.append(_item("Open Claude Code", "Открыть Claude Code", self._open_claude_code))
         menu.append(Gtk.SeparatorMenuItem())
 
+        # Give a gift submenu
+        give_title = "Подарить подарок" if ru else "Give a gift"
+        give_item = Gtk.MenuItem(label=give_title)
+        give_menu = Gtk.Menu()
+        gift_types = [
+            ("flower", "Цветок 🌸", "Flower 🌸"),
+            ("book", "Книжку 📖", "Book 📖"),
+            ("song", "Песенку 🎵", "Song 🎵"),
+            ("marshmallow", "Зефирку 🍡", "Marshmallow 🍡"),
+            ("toy", "Игрушку 🧸", "Toy 🧸"),
+        ]
+        can_give = self.character.can_receive_gift()
+        for gtype, label_ru, label_en in gift_types:
+            label = label_ru if ru else label_en
+            sub = Gtk.MenuItem(label=label)
+            sub.connect("activate", self._give_gift, gtype)
+            if not can_give:
+                sub.set_sensitive(False)
+            give_menu.append(sub)
+        if not can_give:
+            give_menu.append(Gtk.SeparatorMenuItem())
+            cd_label = "Подожди немножко..." if ru else "Wait a bit..."
+            cd_item = Gtk.MenuItem(label=cd_label)
+            cd_item.set_sensitive(False)
+            give_menu.append(cd_item)
+        give_item.set_submenu(give_menu)
+        menu.append(give_item)
+        menu.append(Gtk.SeparatorMenuItem())
+
         # Activities submenu (dev mode only)
         if Settings.shared().dev_mode:
             act_title = "Активности" if ru else "Activities"
@@ -447,6 +488,14 @@ class CrabApp:
                 subprocess.Popen(['gnome-terminal', '--', 'claude'])
         except Exception:
             pass
+
+    def _give_gift(self, item, gift_type):
+        if self.character.receive_gift(gift_type):
+            for etype, edata in self.character.events:
+                if etype == "message":
+                    self.speech.show(
+                        edata, self._abs_x(self.character.x), self._win_y())
+            self.character.events = []
 
     def _play_activity(self, item, name):
         self.character.friend_visible = False
@@ -624,6 +673,9 @@ class CrabApp:
         # Update friend sprite name
         if result["friend_visible"]:
             self.friend_sprite = result.get("friend_sprite", "idle")
+
+        # Update toy visibility
+        self.show_toy = result.get("show_toy", False)
 
         # Update particles
         self.particles.update(dt)

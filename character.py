@@ -1,9 +1,11 @@
 """Character state machine and phased animation engine."""
 
 import random
+import time as _time
 from config import WINDOW_WIDTH, SPRITE_SIZE
 from schedule import get_weights
 from phrases import t, format_phrase
+
 
 
 class Phase:
@@ -336,6 +338,11 @@ class Character:
         # Gift pause — stops activity transitions while waiting for user
         self.gift_waiting = False
 
+        # User gifts to Claudy (session-only)
+        self.has_marshmallow = False
+        self.has_toy = False
+        self.last_gift_received_time = 0
+
         # Friend summoning
         self.friend_visible = False
         self.friend_sprite = "idle"
@@ -376,6 +383,7 @@ class Character:
             "message": self.current_message,
             "friend_visible": self.friend_visible,
             "friend_sprite": self.friend_sprite,
+            "show_toy": self.has_toy and self.state == "sleeping",
         }
 
     def _update_phrase_cooldown(self):
@@ -794,7 +802,7 @@ class Character:
         self.particle_timer = 0
         self.current_message = None
 
-        # Sleep greeting when attached
+        # Sleep greeting when attached + toy integration
         if name == "sleeping":
             from memory import Memory
             from settings import Settings
@@ -804,6 +812,39 @@ class Character:
                 msg = format_phrase(random.choice(SLEEP_PHRASES), name=n)
                 self.current_message = msg
                 self.events.append(("message", msg))
+
+        # Campfire marshmallow integration
+        if name == "campfire":
+            activity = ACTIVITIES["campfire"]
+            if self.has_marshmallow:
+                from settings import Settings
+                from phrases import (CAMPFIRE_MARSHMALLOW_ROAST_PHRASES,
+                                     CAMPFIRE_MARSHMALLOW_ROAST_PHRASES_NAMELESS,
+                                     CAMPFIRE_MARSHMALLOW_DONE_PHRASES,
+                                     CAMPFIRE_MARSHMALLOW_DONE_PHRASES_NAMELESS)
+                n = Settings.shared().user_name
+                if n:
+                    roast_msg = format_phrase(
+                        random.choice(CAMPFIRE_MARSHMALLOW_ROAST_PHRASES), name=n)
+                    done_msg = format_phrase(
+                        random.choice(CAMPFIRE_MARSHMALLOW_DONE_PHRASES), name=n)
+                else:
+                    roast_msg = format_phrase(
+                        random.choice(CAMPFIRE_MARSHMALLOW_ROAST_PHRASES_NAMELESS))
+                    done_msg = format_phrase(
+                        random.choice(CAMPFIRE_MARSHMALLOW_DONE_PHRASES_NAMELESS))
+                activity[3] = Phase(
+                    ["campfire_roast"], 500, 5000, message=roast_msg)
+                activity[4] = Phase(
+                    ["campfire_done"], 500, 3000, message=done_msg,
+                    particle="heart", particle_interval_ms=800, bounce=True)
+            else:
+                # Restore defaults (avoid stale mutation)
+                activity[3] = Phase(
+                    ["campfire_roast"], 500, 5000, message="жарит зефирку!")
+                activity[4] = Phase(
+                    ["campfire_done"], 500, 3000, message="вкусно! :3",
+                    particle="heart", particle_interval_ms=800, bounce=True)
 
         phase = ACTIVITIES[name][0]
         if phase.duration_max_ms:
@@ -925,6 +966,12 @@ class Character:
             return "wave"
         if self.state == "reaction_surprise":
             return "surprise"
+        if self.state == "reaction_gift_received":
+            if self.state_timer < 500:
+                return "surprise"
+            elif self.state_timer < 1500:
+                return "happy"
+            return "love"
         if self.state == "dragging":
             return "surprise"
 
@@ -936,6 +983,52 @@ class Character:
             return frame_name
 
         return "idle"
+
+    def can_receive_gift(self):
+        """Check if cooldown has elapsed for receiving gifts."""
+        from settings import Settings, GIFT_COOLDOWNS
+        cooldown = GIFT_COOLDOWNS.get(Settings.shared().gift_cooldown, 600)
+        return (_time.time() - self.last_gift_received_time) >= cooldown
+
+    def receive_gift(self, gift_type):
+        """Handle user giving a gift to Claudy. Returns True if accepted."""
+        if not self.can_receive_gift():
+            return False
+
+        self.last_gift_received_time = _time.time()
+
+        # Set persistent session flags
+        if gift_type == "marshmallow":
+            self.has_marshmallow = True
+        elif gift_type == "toy":
+            self.has_toy = True
+
+        # Count as 2 clicks toward attachment
+        from memory import Memory
+        Memory.shared().record_click()
+        Memory.shared().record_click()
+
+        # Pick gift-specific phrase
+        from phrases import GIFT_RECEIVE_PHRASES
+        phrases = GIFT_RECEIVE_PHRASES.get(gift_type, ["спасибо! :3"])
+        phrase = t(random.choice(phrases))
+
+        # Enter gift-received reaction
+        self.state = "reaction_gift_received"
+        self.state_timer = 0
+        self.reaction_duration = 3000
+        self.is_bouncing = True
+        self.bounce_phase = 0
+        self.current_message = phrase
+        self.events.append(("message", phrase))
+        for _ in range(5):
+            self.events.append(("particle", "sparkle"))
+        for _ in range(3):
+            self.events.append(("particle", "heart"))
+        if gift_type == "song":
+            for _ in range(4):
+                self.events.append(("particle", "note"))
+        return True
 
     def trigger_activity(self, name):
         """Start a specific activity (e.g. triggered by user opening an app)."""
@@ -1015,7 +1108,8 @@ class Character:
             self._enter_idle()
 
         # Hearts during love/happy_love reactions
-        if self.state in ("reaction_love", "reaction_happy_love"):
+        if self.state in ("reaction_love", "reaction_happy_love",
+                         "reaction_gift_received"):
             self.particle_timer += dt
             if self.particle_timer > 400:
                 self.particle_timer = 0

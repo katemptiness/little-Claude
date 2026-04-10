@@ -186,6 +186,40 @@ class CrabView(AppKit.NSView):
                             "openClaudeCode:"))
         menu.addItem_(AppKit.NSMenuItem.separatorItem())
 
+        # Give a gift submenu
+        delegate = AppKit.NSApp.delegate()
+        give_title = "Подарить подарок" if ru else "Give a gift"
+        give_menu = AppKit.NSMenu.alloc().initWithTitle_(give_title)
+        gift_types = [
+            ("flower", "Цветок 🌸", "Flower 🌸"),
+            ("book", "Книжку 📖", "Book 📖"),
+            ("song", "Песенку 🎵", "Song 🎵"),
+            ("marshmallow", "Зефирку 🍡", "Marshmallow 🍡"),
+            ("toy", "Игрушку 🧸", "Toy 🧸"),
+        ]
+        can_give = delegate.character.can_receive_gift()
+        for gtype, label_ru, label_en in gift_types:
+            label = label_ru if ru else label_en
+            item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+                label, "giveGift:", "")
+            item.setTarget_(delegate)
+            item.setRepresentedObject_(gtype)
+            if not can_give:
+                item.setEnabled_(False)
+            give_menu.addItem_(item)
+        if not can_give:
+            give_menu.addItem_(AppKit.NSMenuItem.separatorItem())
+            cd_label = "Подожди немножко..." if ru else "Wait a bit..."
+            cd_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+                cd_label, None, "")
+            cd_item.setEnabled_(False)
+            give_menu.addItem_(cd_item)
+        give_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+            give_title, None, "")
+        give_item.setSubmenu_(give_menu)
+        menu.addItem_(give_item)
+        menu.addItem_(AppKit.NSMenuItem.separatorItem())
+
         # Activities submenu (dev mode only)
         if Settings.shared().dev_mode:
             act_title = "Активности" if ru else "Activities"
@@ -275,6 +309,9 @@ class AppDelegate(AppKit.NSObject):
         # Gift system
         self.gift_layer = None
         self.gift_timer = None  # expiry timer
+
+        # Toy emoji (shown during sleep when user gave a toy)
+        self.toy_layer = None
 
         # Initialize memory
         Memory.shared()
@@ -429,6 +466,15 @@ class AppDelegate(AppKit.NSObject):
             )
         import subprocess
         subprocess.Popen(['osascript', '-e', script])
+
+    def giveGift_(self, sender):
+        """Handle user giving a gift to Claudy."""
+        gift_type = sender.representedObject()
+        if self.character.receive_gift(gift_type):
+            for etype, edata in self.character.events:
+                if etype == "message":
+                    self.speech.show(edata, self.character.x, self.dock_y)
+            self.character.events = []
 
     def playActivity_(self, sender):
         """Force-start an activity from the context menu."""
@@ -611,6 +657,22 @@ class AppDelegate(AppKit.NSObject):
 
         # Update friend layer
         self._update_friend(result)
+
+        # Update toy emoji (visible when sleeping with toy)
+        show_toy = result.get("show_toy", False)
+        if show_toy and not self.toy_layer:
+            layer = Quartz.CATextLayer.layer()
+            layer.setString_("🧸")
+            layer.setFontSize_(16)
+            layer.setAlignmentMode_(Quartz.kCAAlignmentCenter)
+            layer.setContentsScale_(2.0)
+            toy_x = SPRITE_OFFSET_X + SPRITE_SIZE - 10
+            layer.setFrame_(((toy_x, SPRITE_OFFSET_Y - 5), (25, 25)))
+            self.content_layer.addSublayer_(layer)
+            self.toy_layer = layer
+        elif not show_toy and self.toy_layer:
+            self.toy_layer.removeFromSuperlayer()
+            self.toy_layer = None
 
         # Render particles
         self._render_particles()

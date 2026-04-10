@@ -24,7 +24,8 @@ A tiny pixel-art crab companion that lives on your Dock. It reads books, catches
 - Mirrors your activity — open a terminal or code editor and the crab starts coding; open Spotify and it listens to music
 - Notices when you launch apps and comments on them (remembers how many times you opened the same app today)
 - Sleeps when your machine sleeps, greets you when it wakes up
-- Gives you gifts — catches a fish? Finds a star? Might leave it on the Dock for you
+- Gives you gifts — catches a fish? Finds a shell? Might leave it on the Dock for you
+- Accepts gifts from you — give Claudy a marshmallow and it'll roast it at the campfire; give a toy and it sleeps with it
 - Gradually notices you — click enough and Claudy starts using your name, showing hearts, and saying personal things
 - Remembers how many days you've been together and occasionally mentions it
 - Says things in cute speech bubbles — in Russian or English (configurable)
@@ -73,7 +74,7 @@ Requires Python 3.10+, GTK3, and a bottom panel/dock. Tested on Ubuntu 24.04 LTS
 | Click (with gift) | Collects the gift — Claudy reacts happily |
 | Double-click | Opens Claude.app (macOS) / claude.ai (Linux) |
 | Drag & drop | Surprised face, falls back to Dock with gravity (macOS only) |
-| Right-click | Context menu (Open Claude, Open Claude Code, Gifts, Settings, About Claudy, Quit) |
+| Right-click | Context menu (Open Claude, Open Claude Code, Give a gift, Gifts, Settings, About Claudy, Quit) |
 
 ## Relationships
 
@@ -98,12 +99,27 @@ During some activities, Claudy may find something and leave it on the Dock for y
 | Fishing | Caught fish, pufferfish, diamond, star | ~30% on good catch |
 | Magic | Flower, butterfly, rainbow | ~20% on successful spell |
 | Telescope | Names a star after you | ~10% per session |
+| Shell collecting | A pretty shell | ~10% per find |
 
 When a gift appears, Claudy pauses activities and announces it ("look what i found!", "this is for you! :3"). Click Claudy to collect. If you don't collect in time, Claudy keeps it ("ok, keeping it for myself :p").
 
+#### Giving gifts to Claudy
+
+Right-click → **Give a gift** to present something to Claudy. Five gift types available:
+
+| Gift | Effect |
+|------|--------|
+| 🌸 Flower | Claudy reacts happily with sparkles and hearts |
+| 📖 Book | "i'll read it before bed!" |
+| 🎵 Song | Music notes float around Claudy |
+| 🍡 Marshmallow | Claudy saves it — next campfire, roasts *your* marshmallow with special phrases |
+| 🧸 Toy | Claudy sleeps with it — a teddy bear emoji appears next to sleeping Claudy |
+
+Each gift counts as 2 clicks toward attachment. Cooldown between gifts is configurable in Settings (default: 10 min). Marshmallow and toy effects persist for the session.
+
 #### Gift Collection
 
-Right-click → **Gifts** to view your collection. Each gift comes with a unique backstory — a cute little tale from Claudy about how the gift was found, caught, or conjured. 120 bilingual stories in total (40 per gift type), randomly assigned at collection time.
+Right-click → **Gifts** to view your collection. Each gift comes with a unique backstory — a cute little tale from Claudy about how the gift was found, caught, or conjured. 160 bilingual stories in total (40 per gift type), randomly assigned at collection time.
 
 ### Memory
 
@@ -174,14 +190,14 @@ app.py                        # Cross-platform entry point (detects OS)
 character.py                  # State machine, phased animation engine
 sprites/
   base.py                     # Idle, blink, walk sprites
-  activities.py               # 50 activity & reaction sprites
+  activities.py               # 39 activity & reaction sprites
 animations.py                 # Bounce, shake, gravity drop
 particles.py                  # 15 particle types (sparkles, hearts, notes, flames, zzz...)
 schedule.py                   # Owl/lark time-of-day behavior weights
 settings.py                   # Settings persistence (JSON)
 phrases.py                    # Bilingual phrase system (RU/EN) + relationship phrases
 memory.py                     # Relationship memory (clicks, days, gifts, app launches)
-gift_stories.py               # 120 bilingual gift backstories (40 per type)
+gift_stories.py               # 160 bilingual gift backstories (40 per type)
 config.py                     # Palette, constants
 
 # macOS backend (PyObjC / AppKit / Quartz)
@@ -216,6 +232,7 @@ Right-click → Settings to configure:
 | Speech frequency | Often (10s) / Normal (1 min) / Rarely / Very rarely / Almost never | Normal |
 | Gift duration | 10s / 1 min / 5 min / 15 min / 30 min / 1 hr | 5 min |
 | Gifts per day | 1 / 3 / 5 / 10 / Unlimited | 3 |
+| Gift cooldown | No cooldown / 1 min / 5 min / 10 min / 30 min | 10 min |
 | Developer mode | Checkbox | Off |
 
 Settings UI is fully localized — labels and options appear in the selected language.

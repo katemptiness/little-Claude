@@ -16,6 +16,7 @@ DEFAULTS = {
     "dev_mode": False,
     "gift_duration": "5m",
     "gift_limit": 3,
+    "gift_cooldown": "10m",
 }
 
 TERMINAL_OPTIONS = ["Terminal", "iTerm2", "Warp"]
@@ -34,6 +35,12 @@ SPEECH_COOLDOWNS = {
 GIFT_DURATIONS = {
     "10s": 10, "1m": 60, "5m": 300,
     "15m": 900, "30m": 1800, "1h": 3600,
+}
+
+# Cooldown in seconds for user-to-Claudy gifts
+GIFT_COOLDOWNS = {
+    "off": 0, "1m": 60, "5m": 300,
+    "10m": 600, "30m": 1800,
 }
 
 # Localized option lists: (key, EN title, RU title)
@@ -63,6 +70,13 @@ _GIFT_LIMIT_OPTIONS = [
     (10, "10", "10"),
     (0, "Unlimited", "Безлимит"),
 ]
+_GIFT_COOLDOWN_OPTIONS = [
+    ("off", "No cooldown", "Без кулдауна"),
+    ("1m", "1 min", "1 мин"),
+    ("5m", "5 min", "5 мин"),
+    ("10m", "10 min", "10 мин"),
+    ("30m", "30 min", "30 мин"),
+]
 
 # Labels: (EN, RU)
 _LABELS = {
@@ -73,6 +87,7 @@ _LABELS = {
     "speech": ("Speech frequency:", "Частота фраз:"),
     "gift_dur": ("Gift duration:", "Время подарка:"),
     "gift_lim": ("Gifts per day:", "Подарков в день:"),
+    "gift_cd": ("Gift cooldown:", "Кулдаун подарков:"),
     "dev": ("Developer mode", "Режим разработчика"),
     "save": ("Save", "Сохранить"),
     "title": ("Claudy — Settings", "Claudy — Настройки"),
@@ -187,5 +202,13 @@ class Settings:
     @gift_limit.setter
     def gift_limit(self, value):
         self._data["gift_limit"] = value
+
+    @property
+    def gift_cooldown(self):
+        return self._data.get("gift_cooldown", "10m")
+
+    @gift_cooldown.setter
+    def gift_cooldown(self, value):
+        self._data["gift_cooldown"] = value
 
 

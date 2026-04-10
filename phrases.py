@@ -297,6 +297,42 @@ _EN = {
     "назвал звезду в честь {name} ⭐": "named a star after {name} ⭐",
     "эта звезда теперь — {name} ⭐": "that star is now called {name} ⭐",
     "назвал звезду в честь тебя ⭐": "named a star after you ⭐",
+
+    # Gift received (user -> Claudy): flower
+    "цветочек! спасибо! 🌸": "a flower! thank you! 🌸",
+    "какой красивый! спасибо!": "how beautiful! thank you!",
+    "мне? правда? :3": "for me? really? :3",
+    "поставлю у себя!": "i'll put it on display!",
+    # Gift received: book
+    "о! книжка! буду читать перед сном!": "oh! a book! i'll read it before bed!",
+    "обожаю читать! спасибо!": "i love reading! thank you!",
+    "какая интересная! :3": "how interesting! :3",
+    "новая книжка! ура!": "a new book! yay!",
+    # Gift received: song
+    "мелодия! ♪♫♬": "a melody! ♪♫♬",
+    "какая красивая песня!": "what a beautiful song!",
+    "буду напевать! ♪": "i'll hum it! ♪",
+    "запомню эту песню :3": "i'll remember this song :3",
+    # Gift received: marshmallow
+    "зефирка! пожарю на костре!": "a marshmallow! i'll roast it on the campfire!",
+    "вкусняшка! сохраню для костра!": "yummy! saving it for the campfire!",
+    "зефир! обожаю! :3": "marshmallow! love it! :3",
+    "пожарю у костра! спасибо!": "i'll roast it at the campfire! thanks!",
+    # Gift received: toy
+    "мишка! буду с ним спать!": "a teddy! i'll sleep with it!",
+    "какой мягкий! :3": "so soft! :3",
+    "игрушка! положу рядом с подушкой!": "a toy! i'll put it next to my pillow!",
+    "теперь не страшно засыпать!": "not scary to fall asleep now!",
+
+    # Campfire marshmallow override (user gave marshmallow)
+    "а эта зефирка от {name} <3": "this marshmallow is from {name} <3",
+    "жарю зефирку от {name}!": "roasting {name}'s marshmallow!",
+    "зефирка от {name}... вкусно будет!": "{name}'s marshmallow... it's gonna be tasty!",
+    "а эта зефирка — подарок <3": "this marshmallow is a gift <3",
+    "жарю подаренную зефирку!": "roasting the gifted marshmallow!",
+    "вкусно! спасибо, {name}! :3": "yummy! thanks, {name}! :3",
+    "самая вкусная зефирка! :3": "the tastiest marshmallow! :3",
+    "вкусно! спасибо за зефирку! :3": "yummy! thanks for the marshmallow! :3",
 }
 
 # --- Phrase lists for the relationship system ---
@@ -371,6 +407,72 @@ STAR_NAMING_PHRASES = [
 
 STAR_NAMING_PHRASES_NAMELESS = [
     "назвал звезду в честь тебя ⭐",
+]
+
+# Gift received phrases (user -> Claudy)
+GIFT_FLOWER_PHRASES = [
+    "цветочек! спасибо! 🌸",
+    "какой красивый! спасибо!",
+    "мне? правда? :3",
+    "поставлю у себя!",
+]
+
+GIFT_BOOK_PHRASES = [
+    "о! книжка! буду читать перед сном!",
+    "обожаю читать! спасибо!",
+    "какая интересная! :3",
+    "новая книжка! ура!",
+]
+
+GIFT_SONG_PHRASES = [
+    "мелодия! ♪♫♬",
+    "какая красивая песня!",
+    "буду напевать! ♪",
+    "запомню эту песню :3",
+]
+
+GIFT_MARSHMALLOW_PHRASES = [
+    "зефирка! пожарю на костре!",
+    "вкусняшка! сохраню для костра!",
+    "зефир! обожаю! :3",
+    "пожарю у костра! спасибо!",
+]
+
+GIFT_TOY_PHRASES = [
+    "мишка! буду с ним спать!",
+    "какой мягкий! :3",
+    "игрушка! положу рядом с подушкой!",
+    "теперь не страшно засыпать!",
+]
+
+GIFT_RECEIVE_PHRASES = {
+    "flower": GIFT_FLOWER_PHRASES,
+    "book": GIFT_BOOK_PHRASES,
+    "song": GIFT_SONG_PHRASES,
+    "marshmallow": GIFT_MARSHMALLOW_PHRASES,
+    "toy": GIFT_TOY_PHRASES,
+}
+
+# Campfire marshmallow override phrases
+CAMPFIRE_MARSHMALLOW_ROAST_PHRASES = [
+    "а эта зефирка от {name} <3",
+    "жарю зефирку от {name}!",
+    "зефирка от {name}... вкусно будет!",
+]
+
+CAMPFIRE_MARSHMALLOW_ROAST_PHRASES_NAMELESS = [
+    "а эта зефирка — подарок <3",
+    "жарю подаренную зефирку!",
+]
+
+CAMPFIRE_MARSHMALLOW_DONE_PHRASES = [
+    "вкусно! спасибо, {name}! :3",
+    "самая вкусная зефирка! :3",
+]
+
+CAMPFIRE_MARSHMALLOW_DONE_PHRASES_NAMELESS = [
+    "вкусно! спасибо за зефирку! :3",
+    "самая вкусная зефирка! :3",
 ]
 
 # Claude.ai easter egg phrases (always English, no translation)

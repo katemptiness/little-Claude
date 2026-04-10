@@ -6,6 +6,7 @@ from settings import (
     Settings, TERMINAL_OPTIONS, LANGUAGE_OPTIONS,
     _SCHEDULE_OPTIONS, _SPEECH_OPTIONS,
     _GIFT_DURATION_OPTIONS, _GIFT_LIMIT_OPTIONS,
+    _GIFT_COOLDOWN_OPTIONS,
     _loc, _l,
 )
 
@@ -26,6 +27,7 @@ class SettingsWindow(AppKit.NSObject):
         self.speech_popup = None
         self.gift_dur_popup = None
         self.gift_lim_popup = None
+        self.gift_cd_popup = None
         self.dev_check = None
         return self
 
@@ -35,7 +37,7 @@ class SettingsWindow(AppKit.NSObject):
             return
 
         lang = self.settings.language
-        w, h = 320, 580
+        w, h = 320, 650
         self.window = AppKit.NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(
             ((200, 200), (w, h)),
             AppKit.NSWindowStyleMaskTitled
@@ -128,6 +130,18 @@ class SettingsWindow(AppKit.NSObject):
         idx = glim_keys.index(self.settings.gift_limit) \
             if self.settings.gift_limit in glim_keys else 1
         self.gift_lim_popup.selectItemAtIndex_(idx)
+        y -= 40
+
+        # Gift cooldown
+        self._add_label(content, _l("gift_cd", lang), 20, y)
+        y -= 28
+        gcd = _loc(_GIFT_COOLDOWN_OPTIONS, lang)
+        self.gift_cd_popup = self._add_popup(
+            content, [t for _, t in gcd], 20, y, 270)
+        gcd_keys = [k for k, _ in gcd]
+        idx = gcd_keys.index(self.settings.gift_cooldown) \
+            if self.settings.gift_cooldown in gcd_keys else 3
+        self.gift_cd_popup.selectItemAtIndex_(idx)
         y -= 35
 
         # Dev mode
@@ -177,6 +191,10 @@ class SettingsWindow(AppKit.NSObject):
         glim_keys = [o[0] for o in _GIFT_LIMIT_OPTIONS]
         self.settings.gift_limit = glim_keys[
             self.gift_lim_popup.indexOfSelectedItem()]
+
+        gcd_keys = [o[0] for o in _GIFT_COOLDOWN_OPTIONS]
+        self.settings.gift_cooldown = gcd_keys[
+            self.gift_cd_popup.indexOfSelectedItem()]
 
         self.settings.dev_mode = (
             self.dev_check.state() == AppKit.NSControlStateValueOn)

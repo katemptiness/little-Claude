@@ -8,6 +8,7 @@ from settings import (
     Settings, LANGUAGE_OPTIONS,
     _SCHEDULE_OPTIONS, _SPEECH_OPTIONS,
     _GIFT_DURATION_OPTIONS, _GIFT_LIMIT_OPTIONS,
+    _GIFT_COOLDOWN_OPTIONS,
     _loc, _l,
 )
 
@@ -142,6 +143,21 @@ class SettingsWindow:
         grid.attach(self.gift_lim_combo, 0, row, 2, 1)
         row += 1
 
+        # Gift cooldown
+        grid.attach(Gtk.Label(label=_l("gift_cd", lang), xalign=0), 0, row, 1, 1)
+        row += 1
+        gcd = _loc(_GIFT_COOLDOWN_OPTIONS, lang)
+        self.gift_cd_combo = Gtk.ComboBoxText()
+        self._gcd_keys = []
+        for key, title in gcd:
+            self.gift_cd_combo.append_text(title)
+            self._gcd_keys.append(key)
+        idx = self._gcd_keys.index(self.settings.gift_cooldown) \
+            if self.settings.gift_cooldown in self._gcd_keys else 3
+        self.gift_cd_combo.set_active(idx)
+        grid.attach(self.gift_cd_combo, 0, row, 2, 1)
+        row += 1
+
         # Dev mode
         self.dev_check = Gtk.CheckButton(label=_l("dev", lang))
         self.dev_check.set_active(self.settings.dev_mode)
@@ -182,6 +198,10 @@ class SettingsWindow:
         idx = self.gift_lim_combo.get_active()
         if idx >= 0:
             self.settings.gift_limit = self._glim_keys[idx]
+
+        idx = self.gift_cd_combo.get_active()
+        if idx >= 0:
+            self.settings.gift_cooldown = self._gcd_keys[idx]
 
         self.settings.dev_mode = self.dev_check.get_active()
 
