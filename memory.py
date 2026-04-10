@@ -180,6 +180,10 @@ class Memory:
                 return gift
         return None
 
+    def count_session_gifts(self, gift_type):
+        """Count gifts of a given type in the current session (collected + pending)."""
+        return sum(1 for g in self._data["gifts"] if g.get("type") == gift_type)
+
     def get_collected_gifts(self):
         """Return all collected gifts, newest first. Backfills missing story_id."""
         from gift_stories import random_story_id

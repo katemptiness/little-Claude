@@ -605,7 +605,10 @@ class Character:
 
         elif phase.special == "star_gaze":
             # ~10% chance to name a star after the user (attachment required)
-            if random.random() < 0.1 and Memory.shared().is_attached():
+            # Hard limit: max 1 named star per session
+            if (random.random() < 0.1
+                    and Memory.shared().is_attached()
+                    and Memory.shared().count_session_gifts("star") == 0):
                 from settings import Settings
                 from phrases import STAR_NAMING_PHRASES, STAR_NAMING_PHRASES_NAMELESS
                 name = Settings.shared().user_name
