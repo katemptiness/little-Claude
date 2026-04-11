@@ -34,10 +34,19 @@ class Memory:
             "gifts": [],
         }
         self._load()
-        self._check_new_day()
-        # Reset per-session state — each launch is a fresh start
-        self._data["today"]["clicks"] = 0
-        self._data["today"]["app_launches"] = {}
+        today_str = date.today().isoformat()
+        # Track very first launch ever (informational only)
+        if self._data["first_launch"] is None:
+            self._data["first_launch"] = today_str
+        # Per-session reset — each launch is a fresh start.
+        # total_days counts days since the current session began, not since first ever.
+        self._data["total_days"] = 1
+        self._data["today"] = {
+            "date": today_str,
+            "clicks": 0,
+            "app_launches": {},
+            "days_phrase_shown": False,
+        }
         self._data["gifts"] = []
         self.save()
 
@@ -78,19 +87,11 @@ class Memory:
                 pass
 
     def _check_new_day(self):
-        """Reset daily counters if the date has changed."""
+        """Bump days counter if the calendar date changed during the session."""
         today_str = date.today().isoformat()
-
-        if self._data["first_launch"] is None:
-            self._data["first_launch"] = today_str
-
         if self._data["today"].get("date") != today_str:
-            # New day
-            if self._data["today"].get("date") is not None:
-                self._data["total_days"] += 1
-            elif self._data["first_launch"] == today_str:
-                # Very first launch ever
-                self._data["total_days"] = 1
+            # New day during the session
+            self._data["total_days"] += 1
             self._data["today"] = {
                 "date": today_str,
                 "clicks": 0,
