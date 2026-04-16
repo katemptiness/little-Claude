@@ -169,6 +169,9 @@ ACTIVITIES = {
     ],
 }
 
+RECENT_ACTIVITY_BLOCK = 2  # how many most-recent activities to exclude from next random pick
+
+
 SHELL_SEARCH_PHRASES = [
     "ищет ракушки...",
     "где-то тут была...",
@@ -345,6 +348,10 @@ class Character:
         self.has_book = False
         self._book_date = None  # date when book was given (resets next day)
         self.last_gift_received_time = 0
+
+        # Recent activity rotation — last N activity names, used to avoid immediate repeats.
+        # Walking/idle never get added (they don't route through _start_activity).
+        self.recent_activities = []
 
         # Friend summoning
         self.friend_visible = False
@@ -769,6 +776,13 @@ class Character:
             self._enter_idle()
             return
 
+        # Exclude recently-picked activities. Idle/walking are never in recent_activities,
+        # so they remain available as natural rest fallbacks. If filtering empties the pool
+        # (e.g. deep_sleep has only "sleeping" and it just ran), fall back to unfiltered.
+        filtered = {n: w for n, w in available.items() if n not in self.recent_activities}
+        if filtered:
+            available = filtered
+
         names = list(available.keys())
         w = list(available.values())
         chosen = random.choices(names, weights=w, k=1)[0]
@@ -812,6 +826,12 @@ class Character:
         self.facing_right = dx > 0
 
     def _start_activity(self, name):
+        # Record the activity for the no-repeat rotation. Catches both random picks
+        # (via _pick_next_activity) and user-triggered starts (via trigger_activity).
+        self.recent_activities.append(name)
+        if len(self.recent_activities) > RECENT_ACTIVITY_BLOCK:
+            self.recent_activities.pop(0)
+
         self.state = name
         self.phase_index = 0
         self.phase_timer = 0
